@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "432700589651",
+    "firebase_url": "https://tmchat-856e4-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "tmchat-856e4",
+    "storage_bucket": "tmchat-856e4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432700589651:android:d0010d266e0b61fd2528a6",
+        "android_client_info": {
+          "package_name": "com.tmchatapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "432700589651-on0g5tjd5k0v639vfbvcv6e3d35eq864.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tmchatapp",
+            "certificate_hash": "453e27fd3511ccccde7a361ccea146828a20f175"
+          }
+        },
+        {
+          "client_id": "432700589651-ho1ope7d0o8hpbq32q6oildoi20gm6ev.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJk1yqw0KrxJWTSTNdqCgO_oMkEBppvtw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "432700589651-ho1ope7d0o8hpbq32q6oildoi20gm6ev.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
