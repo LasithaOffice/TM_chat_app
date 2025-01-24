@@ -17,26 +17,27 @@ import {
   Colors,
 } from 'react-native/Libraries/NewAppScreen';
 import MainNavigation from './src/navigation';
+import { Provider } from 'react-redux';
+import { store } from './src/redux/store';
 
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
   const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    backgroundColor: Colors.darker,
     flex: 1,
   };
-
   return (
-    <View style={{
-      flex: 1,
-    }}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <MainNavigation />
-    </View>
+    <Provider store={store}>
+      <View style={{
+        flex: 1,
+      }}>
+        <StatusBar
+          barStyle={'light-content'}
+          backgroundColor={backgroundStyle.backgroundColor}
+        />
+        <MainNavigation />
+      </View>
+    </Provider>
   );
 }
 
