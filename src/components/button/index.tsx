@@ -5,6 +5,7 @@ type Props = {
   title: string,
   onPress: () => void,
   marginBottom?: number,
+  marginHorizontal?: number,
   marginTop?: number,
   dark?: boolean,
   loading?: boolean
@@ -14,13 +15,14 @@ const Button = (p: Props) => {
   return (
     <TouchableOpacity activeOpacity={0.7} onPress={p.onPress} style={[styles.loginButton, {
       backgroundColor: (p.dark) ? '#111' : '#ddd',
-      marginBottom: (p.marginBottom) ? p.marginBottom : 0
+      marginBottom: (p.marginBottom) ? p.marginBottom : 0,
+      marginHorizontal: (p.marginHorizontal) ? p.marginHorizontal : 0,
     }]}>
       {
         (p.loading) ?
           <ActivityIndicator />
           :
-          <Text style={{ color: '#000', fontSize: 16, textAlign: 'center' }}>{p.title}</Text>
+          <Text style={{ color: (p.dark) ? '#ddd' : '#000', fontSize: 16, textAlign: 'center' }}>{p.title}</Text>
       }
     </TouchableOpacity>
   )

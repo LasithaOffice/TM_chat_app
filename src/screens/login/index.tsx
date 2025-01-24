@@ -25,11 +25,32 @@ const Login = () => {
       console.log(r)
       if (r.user) {
         console.log(r.user.displayName)
-        disptch(saveUser({
-          email: r.user.email + "",
-          fullname: '',
-        }))
-        nav.navigate('CreateAccount')
+        rdb.ref('/users/' + (r.user.email + "").replaceAll("@", "_").replaceAll(".", "_"))
+          .once('value')
+          .then(snapshot => {
+            if (snapshot.exists()) {
+              const u = snapshot.val();
+              console.log({
+                email: r.user.email + "",
+                displayName: u.displayName,
+                avatar: u.avatar
+              })
+              disptch(saveUser({
+                email: r.user.email + "",
+                displayName: u.displayName,
+                avatar: u.avatar
+              }))
+              nav.replace('Home')
+            } else {
+              disptch(saveUser({
+                email: r.user.email + "",
+                displayName: '',
+                avatar: 'male_1'
+              }))
+              nav.navigate('CreateAccount')
+              setChecking(false);
+            }
+          });
       }
     }).catch((err) => {
       console.log(err)
@@ -47,6 +68,12 @@ const Login = () => {
           .once('value')
           .then(snapshot => {
             if (snapshot.exists()) {
+              const u = snapshot.val();
+              disptch(saveUser({
+                email: u.email,
+                displayName: u.displayName,
+                avatar: u.avatar
+              }))
               nav.navigate('Home')
             } else {
               setChecking(false);
