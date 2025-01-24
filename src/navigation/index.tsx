@@ -7,6 +7,7 @@ import Login from '../screens/login';
 import CreateAccount from '../screens/createAccount';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Home from '../screens/home';
+import VoiceCall from '../screens/voiceCall';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +31,11 @@ const MainNavigation = () => {
           }
         } />
         <Stack.Screen name='Home' component={Home} options={
+          {
+            headerShown: false
+          }
+        } />
+        <Stack.Screen name='VoiceCall' component={VoiceCall} options={
           {
             headerShown: false
           }

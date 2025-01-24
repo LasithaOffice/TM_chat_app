@@ -4,12 +4,14 @@ import { Colors } from 'react-native/Libraries/NewAppScreen'
 import { useSelector } from 'react-redux'
 import { getUser } from '../../redux/slices/userSlice'
 import Button from '../../components/button'
+import { useNavigation } from '@react-navigation/native'
 
 const Home = () => {
 
   const user = useSelector(getUser)
 
   const img = '../../resources/images/' + user.user.avatar;
+  const nav: any = useNavigation();
 
   return (
     <View style={styles.container}>
@@ -37,7 +39,9 @@ const Home = () => {
         <Text style={styles.uname}>{"Welcome " + user.user.displayName}</Text>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, marginHorizontal: 10 }}>
-        <View style={{ flex: 0.48 }}><Button dark title='Voice Call' onPress={() => { }} /></View>
+        <View style={{ flex: 0.48 }}><Button dark title='Voice Call' onPress={() => {
+          nav.navigate('VoiceCall');
+        }} /></View>
         <View style={{ flex: 0.48 }}><Button dark title='Video Call' onPress={() => { }} /></View>
       </View>
       <View style={{ marginHorizontal: 10, marginTop: 15 }}><Button dark title='New Chat' onPress={() => { }} /></View>
