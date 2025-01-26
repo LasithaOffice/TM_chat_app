@@ -7,9 +7,13 @@
 
 import React from 'react';
 import {
+  Animated,
   StatusBar,
   StyleSheet,
+  Text,
+  TouchableOpacity,
   useColorScheme,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -19,6 +23,9 @@ import {
 import MainNavigation from './src/navigation';
 import { Provider } from 'react-redux';
 import { store } from './src/redux/store';
+import Avatar from './src/components/avatar';
+import { Icon } from '@rneui/base';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 
 function App(): React.JSX.Element {
@@ -26,18 +33,21 @@ function App(): React.JSX.Element {
     backgroundColor: Colors.darker,
     flex: 1,
   };
+
   return (
     <Provider store={store}>
-      <View style={{
-        flex: 1,
-      }}>
-        <StatusBar
-          barStyle={'light-content'}
-          backgroundColor={backgroundStyle.backgroundColor}
-        />
-        <MainNavigation />
-      </View>
-    </Provider>
+      <SafeAreaProvider>
+        <View style={{
+          flex: 1,
+        }}>
+          <StatusBar
+            barStyle={'light-content'}
+            backgroundColor={backgroundStyle.backgroundColor}
+          />
+          <MainNavigation />
+        </View>
+      </SafeAreaProvider>
+    </Provider >
   );
 }
 
