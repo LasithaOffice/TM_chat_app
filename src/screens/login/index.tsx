@@ -74,7 +74,7 @@ const Login = () => {
                 displayName: u.displayName,
                 avatar: u.avatar
               }))
-              nav.navigate('Home')
+              nav.replace('Home')
             } else {
               setChecking(false);
             }

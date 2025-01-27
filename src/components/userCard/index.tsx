@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux'
 import { CallObject } from '../../entity/types'
 import { useNavigation } from '@react-navigation/native'
 
-const UserCard = ({ user, setCaller }: { user: User, setCaller: Function }) => {
+const UserCard = ({ user }: { user: User }) => {
 
   const currentUser = useSelector(getUser);
   const [processing, setProcessing] = useState(false);
@@ -30,7 +30,13 @@ const UserCard = ({ user, setCaller }: { user: User, setCaller: Function }) => {
                 type: "voice"
               })
               .then(() => {
-                setCaller(user);
+                setProcessing(false);
+                nav.navigate('VoiceCall', {
+                  callerName: user.displayName,
+                  callerAvatar: user.avatar,
+                  callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+                  act: "sender",
+                })
               });
           } else {
             setProcessing(false);
@@ -40,12 +46,19 @@ const UserCard = ({ user, setCaller }: { user: User, setCaller: Function }) => {
           rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
             .set({
               callerName: currentUser.user.displayName,
+              callerAvatar: currentUser.user.avatar,
               callerId: currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"),
               status: "incoming",
               type: "voice"
             })
             .then(() => {
-              setCaller(user);
+              setProcessing(false);
+              nav.navigate('VoiceCall', {
+                callerName: user.displayName,
+                callerAvatar: user.avatar,
+                callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+                act: "sender",
+              })
             });
         }
       })

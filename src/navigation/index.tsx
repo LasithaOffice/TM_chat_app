@@ -7,7 +7,6 @@ import Login from '../screens/login';
 import CreateAccount from '../screens/createAccount';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Home from '../screens/home';
-import VoiceCall from '../screens/callList';
 import VideoCall from '../screens/videoCall';
 import VPreview from '../screens/videoCall/preview';
 import Avatar from '../components/avatar';
@@ -18,6 +17,7 @@ import { rdb } from '../firebase/firebaseInit';
 import { CallObject } from '../entity/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CallList from '../screens/callList';
+import VoiceCall from '../screens/voiceCall';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,16 +42,26 @@ const MainNavigation = () => {
 
   function callEnds() {
     console.log("hideeeee")
+    Animated.spring(a, {
+      speed: 1,
+      toValue: (height),
+      useNativeDriver: true,
+    }).start();
+  }
+
+  function endCall() {
+    console.log("hideeeee")
     //ToastAndroid.show("ends", ToastAndroid.SHORT)
     Animated.spring(a, {
       speed: 1,
       toValue: (height),
       useNativeDriver: true,
     }).start();
-    // rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_"))
-    //   .set({
-    //     status: "ended"
-    //   })
+    Vibration.cancel();
+    rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+      .set({
+        status: "ended"
+      })
   }
 
   const user = useSelector(getUser);
@@ -189,7 +199,7 @@ const MainNavigation = () => {
           }}>
             <Icon size={30} color={'#fff'} name='phone' type='font-awesome' />
           </TouchableOpacity>
-          <TouchableOpacity onPress={callEnds} style={{
+          <TouchableOpacity onPress={endCall} style={{
             width: 40, height: 40,
             backgroundColor: '#444', borderRadius: 100,
             justifyContent: 'center', alignItems: 'center'

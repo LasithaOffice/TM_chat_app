@@ -20,12 +20,10 @@ import { Icon } from '@rneui/base';
 import { CallObject } from '../../entity/types';
 import { useNavigation } from '@react-navigation/native';
 
-
-
 const VoiceCall = (p: any) => {
 
   const appId = '79fb6b3a4cd34b79a5e3b60379268854';
-  const token = '007eJxTYMgoeZ9cGn2ca+rTTI9nR19ZptZrHk9d3RXX+/HuK06Lvy4KDOaWaUlmScaJJskpxiZJ5paJpqnGSWYGxuaWRmYWFqYmwecmpzcEMjIol4YwMjJAIIjPxVCWn5mcGp+cmJPDwAAAmnUi2Q==';
+  const token = '007eJxTYMjKelkVtqhpVtDbDyvr8i7OL1XdGGXv+5pfRG0y38RPGyYrMJhbpiWZJRknmiSnGJskmVsmmqYaJ5kZGJtbGplZWJiavDCbnt4QyMgwa8J0VkYGCATxuRjK8jOTU+OTE3NyGBgAZWoiow==';
   const channelName = 'voice_call';
   const uid = 0; // Local user UID, no need to modify
 
@@ -37,17 +35,16 @@ const VoiceCall = (p: any) => {
     }
   };
 
-  const agoraEngineRef = useRef<any>();
+  const agoraEngineRef = useRef<IRtcEngine>();
   const [message, showMessage] = useState("")
   const [isJoined, setIsJoined] = useState(false);
   const [remoteUid, setRemoteUid] = useState(0);
 
   const curentUser = useSelector(getUser);
-
   const eventHandler = useRef<IRtcEngineEventHandler>();
 
   function createCall() {
-    ToastAndroid.show("created a call", ToastAndroid.SHORT)
+    // ToastAndroid.show("created a call" + agoraEngineRef.current, ToastAndroid.SHORT)
     agoraEngineRef.current?.joinChannel(token, channelName, uid, {
       channelProfile: ChannelProfileType.ChannelProfileCommunication,
       clientRoleType: ClientRoleType.ClientRoleBroadcaster,
@@ -57,7 +54,7 @@ const VoiceCall = (p: any) => {
   }
 
   function pickCall() {
-    ToastAndroid.show("picked the call", ToastAndroid.SHORT)
+    // ToastAndroid.show("picked the call " + agoraEngineRef.current, ToastAndroid.SHORT)
     agoraEngineRef.current?.joinChannel(token, channelName, uid, {
       channelProfile: ChannelProfileType.ChannelProfileCommunication,
       clientRoleType: ClientRoleType.ClientRoleAudience,
@@ -70,25 +67,13 @@ const VoiceCall = (p: any) => {
     agoraEngineRef.current?.leaveChannel();
     setRemoteUid(0);
     setIsJoined(false);
+    nav.goBack();
     showMessage('You left the channel');
   }
 
-  const [loading, setLoading] = useState(false);
   const [ending, setEnding] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
   const [caller, setCaller] = useState<User | null>(null);
   const [callerEm, setCallerEm] = useState<string>("");
-
-  function loadUsers() {
-    setLoading(true);
-    loadAllUsers().then(data => {
-      console.log("users", Object.values(data.val()))
-      setLoading(false);
-      setUsers((Object.values(data.val()) as User[]).filter((u: User) => u.email != curentUser.user.email) as User[]);
-    }).catch(e => {
-      setLoading(false);
-    });
-  }
 
   const currentCall = useRef<any>();
   const nav: any = useNavigation();
@@ -112,6 +97,8 @@ const VoiceCall = (p: any) => {
         },
         onUserOffline: (_connection: RtcConnection, uid: number) => {
           showMessage('Remote user ' + uid + ' left the channel');
+          nav.goBack();
+          ToastAndroid.show("going back", ToastAndroid.SHORT);
           setRemoteUid(0);
         },
       };
@@ -129,24 +116,23 @@ const VoiceCall = (p: any) => {
         })
       }
     } catch (e) {
-      console.log(e);
+      console.log("error", e);
     }
   };
 
   useEffect(() => {
     setupVideoSDKEngine();
-    if (!(p.route.params && p.route.params.callerName)) {
-      loadUsers()
-    }
     return () => {
-      agoraEngineRef.current?.unregisterEventHandler(eventHandler.current);
-      agoraEngineRef.current?.release();
+      if (eventHandler.current) {
+        agoraEngineRef.current?.unregisterEventHandler(eventHandler.current);
+        agoraEngineRef.current?.release();
+      }
     };
   }, [])
 
   useEffect(() => {
     if (caller) {
-      if (!(p.route.params && p.route.params.callerName)) {
+      if ((p.route.params && p.route.params.act == "sender")) {
         createCall();
         setCallerEm(caller.email);
         // currentCall.current = rdb.ref('/calls/' + caller.email.replaceAll("@", "_").replaceAll(".", "_"))
@@ -179,30 +165,36 @@ const VoiceCall = (p: any) => {
     }
   }, [caller])
 
+  const [isMute, setIsMute] = useState(false);
   function muteUnmuteCall() {
-
+    if (isMute) {
+      setIsMute(false);
+      agoraEngineRef.current?.adjustRecordingSignalVolume(100);
+    } else {
+      setIsMute(true);
+      agoraEngineRef.current?.adjustRecordingSignalVolume(0);
+    }
   }
 
   function endCall() {
-    if (!(p.route.params && p.route.params.callerName)) {
+    console.log("dataaa ", (p.route.params && p.route.params.act == "sender"), caller)
+    if ((p.route.params && p.route.params.act == "sender")) {
       if (caller) {
-        setEnding(false);
         rdb.ref('/calls/' + caller.email.replaceAll("@", "_").replaceAll(".", "_"))
           .set({
             status: "ended",
           }).then(() => {
-            setEnding(false);
-            nav.goBack();
+            // setEnding(false);
+            // nav.goBack();
           });
       }
     } else {
-      setEnding(false);
       rdb.ref('/calls/' + curentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
         .set({
           status: "ended",
         }).then(() => {
-          setEnding(false);
-          setCaller(null);
+          // setEnding(false);
+          // setCaller(null);
         });
     }
     leaveChanel();
@@ -210,86 +202,73 @@ const VoiceCall = (p: any) => {
 
   return (
     <View style={styles.container}>
-      <Text onPress={leaveChanel} style={styles.mainHeader}>Call {message}</Text>
-      {/* <Text style={styles.uname}>{"Message " + message}</Text> */}
-      {/* <View style={{ width: 20, height: 20, backgroundColor: (isJoined) ? "#008833" : "#992222", margin: 10, borderRadius: 200 }}></View> */}
+      <Text onPress={leaveChanel} style={styles.mainHeader}>{message}</Text>
       {
-        (!caller) ?
-          (loading) ?
-            <ActivityIndicator />
-            :
-            <FlatList
-              style={{ paddingTop: 10, width: '100%', }}
-              keyExtractor={(item, index) => index.toString()}
-              data={users}
-              renderItem={({ item }) =>
-                <UserCard user={item} setCaller={setCaller} key={item.email} />
-              }
-            />
-          :
-          <View style={{ flex: 1 }}>
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Avatar avt={caller.avatar} size={100} />
-              <Text style={{ textAlign: 'center', fontSize: 25, fontWeight: '500', color: '#ddd', marginTop: 20 }}>{caller.displayName}</Text>
-            </View>
-            {
-              (isJoined) ?
-                <View style={{ paddingHorizontal: 10 }}>
-                  <TouchableOpacity onPress={muteUnmuteCall} style={{
-                    width: 40, height: 40,
-                    backgroundColor: 'red', borderRadius: 100,
-                    justifyContent: 'center', alignItems: 'center',
-                    marginRight: 10
-                  }}>
-                    <Icon size={30} color={'#fff'} name='phone' type='font-awesome' />
-                  </TouchableOpacity>
-                  <View style={{ flex: 1 }}></View>
-                  <TouchableOpacity onPress={endCall} style={{
-                    width: 40, height: 40,
-                    backgroundColor: '#444', borderRadius: 100,
-                    justifyContent: 'center', alignItems: 'center'
-                  }}>
-                    <Icon size={35} color={'#fff'} name='cross' type='entypo' />
-                  </TouchableOpacity>
-                </View>
-                :
-                <View style={{ alignItems: 'center', marginBlock: 50 }}>
-                  <TouchableOpacity onPress={endCall} style={{
-                    width: 70,
-                    height: 70,
-                    borderRadius: 100,
-                    backgroundColor: 'red',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}>
-                    {
-                      (ending) ?
-                        <ActivityIndicator size={20} color="#fff" />
-                        :
-                        <Icon name='phone-slash' type='font-awesome-5' color='#fff' size={30} />
-                    }
-                  </TouchableOpacity>
-                </View>
-            }
+        (caller) &&
+        <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <Avatar avt={caller.avatar} size={100} />
+            <Text style={{ textAlign: 'center', fontSize: 25, fontWeight: '500', color: '#ddd', marginTop: 20 }}>{caller.displayName}</Text>
           </View>
+          {
+            (remoteUid != 0) ?
+              <View style={{
+                paddingHorizontal: 20,
+                flexDirection: 'row',
+                paddingBottom: 20,
+                justifyContent: 'space-between'
+              }}>
+                <TouchableOpacity onPress={muteUnmuteCall} style={{
+                  width: 50, height: 50,
+                  backgroundColor: (isMute) ? '#444' : '#00a2ff', borderRadius: 100,
+                  justifyContent: 'center', alignItems: 'center',
+                  marginRight: 10
+                }}>
+                  {
+                    (!isMute) ?
+                      <Icon size={30} color={'#fff'} name='unmute' type='octicon' />
+                      :
+                      <Icon size={30} color={'#fff'} name='mute' type='octicon' />
+                  }
+                </TouchableOpacity>
+                {/* <TouchableOpacity onPress={muteUnmuteCall} style={{
+                  width: 50, height: 50,
+                  backgroundColor: 'red', borderRadius: 100,
+                  justifyContent: 'center', alignItems: 'center',
+                  marginRight: 10
+                }}>
+                  <Icon size={30} color={'#fff'} name='phone' type='font-awesome' />
+                </TouchableOpacity> */}
+                {/* <View style={{ flex: 1 }}></View> */}
+                <TouchableOpacity onPress={endCall} style={{
+                  width: 50, height: 50,
+                  backgroundColor: 'red', borderRadius: 100,
+                  justifyContent: 'center', alignItems: 'center'
+                }}>
+                  <Icon name='phone-slash' type='font-awesome-5' color='#fff' size={20} />
+                </TouchableOpacity>
+              </View>
+              :
+              <View style={{ alignItems: 'center', marginBlock: 50 }}>
+                <TouchableOpacity onPress={endCall} style={{
+                  width: 70,
+                  height: 70,
+                  borderRadius: 100,
+                  backgroundColor: 'red',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  {
+                    (ending) ?
+                      <ActivityIndicator size={20} color="#fff" />
+                      :
+                      <Icon name='phone-slash' type='font-awesome-5' color='#fff' size={30} />
+                  }
+                </TouchableOpacity>
+              </View>
+          }
+        </View>
       }
-      {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, marginHorizontal: 10 }}>
-        <View style={{ flex: 0.48 }}>
-          <Button dark title='Call' onPress={() => {
-            createCall();
-          }} />
-        </View>
-        <View style={{ flex: 0.48 }}>
-          <Button dark title='Answer' onPress={() => {
-            pickCall();
-          }} />
-        </View>
-      </View>
-      <View style={{ marginHorizontal: 10, marginTop: 15 }}>
-        <Button dark title='End Call' onPress={() => {
-          leaveChanel();
-        }} />
-      </View> */}
     </View>
   )
 }

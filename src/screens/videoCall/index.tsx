@@ -12,8 +12,6 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Button from '../../components/button';
 import { useNavigation } from '@react-navigation/native';
 
-
-
 const VideoCall = () => {
 
   const appId = '79fb6b3a4cd34b79a5e3b60379268854';
