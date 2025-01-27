@@ -5,5 +5,5 @@ export interface CallObject {
   callerName: string,
   callerAvatar: Avatars,
   status: "incoming" | "ended" | "incall",
-  type: "voice" | "vodeo"
+  type: "voice" | "video"
 }

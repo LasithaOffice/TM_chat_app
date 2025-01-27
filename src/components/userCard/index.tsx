@@ -65,13 +65,53 @@ const UserCard = ({ user }: { user: User }) => {
   }
 
   function initiateAVideoCall() {
+    setProcessing(true);
     rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
-      .set({
-        caller: currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"),
-        status: "incoming",
-        type: "voice"
+      .once('value', (snapshot) => {
+        const call: CallObject = snapshot.val() as CallObject;
+        if (call) {
+          if (call.status == 'ended') {
+            rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+              .set({
+                callerName: currentUser.user.displayName,
+                callerAvatar: currentUser.user.avatar,
+                callerId: currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"),
+                status: "incoming",
+                type: "video"
+              })
+              .then(() => {
+                setProcessing(false);
+                nav.navigate('VideoCall', {
+                  callerName: user.displayName,
+                  callerAvatar: user.avatar,
+                  callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+                  act: "sender",
+                })
+              });
+          } else {
+            setProcessing(false);
+            ToastAndroid.show("Already in a call!", ToastAndroid.SHORT);
+          }
+        } else {
+          rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+            .set({
+              callerName: currentUser.user.displayName,
+              callerAvatar: currentUser.user.avatar,
+              callerId: currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"),
+              status: "incoming",
+              type: "video"
+            })
+            .then(() => {
+              setProcessing(false);
+              nav.navigate('VideoCall', {
+                callerName: user.displayName,
+                callerAvatar: user.avatar,
+                callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+                act: "sender",
+              })
+            });
+        }
       })
-      .then(() => console.log('Data set.'));
   }
 
   return (

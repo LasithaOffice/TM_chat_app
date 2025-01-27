@@ -68,40 +68,25 @@ const VideoCall = () => {
 
   function createCall() {
     agoraEngineRef.current?.startPreview();
-    // Join the channel as a broadcaster
     agoraEngineRef.current?.joinChannel(token, channelName, uid, {
-      // Set channel profile to live broadcast
       channelProfile: ChannelProfileType.ChannelProfileCommunication,
-      // Set user role to broadcaster
       clientRoleType: ClientRoleType.ClientRoleBroadcaster,
-      // Publish audio collected by the microphone
       publishMicrophoneTrack: true,
-      // Publish video collected by the camera
       publishCameraTrack: true,
-      // Automatically subscribe to all audio streams
       autoSubscribeAudio: true,
-      // Automatically subscribe to all video streams
       autoSubscribeVideo: true,
     });
-    nav.navigate('VPreview');
   }
 
   function pickCall() {
     agoraEngineRef.current?.joinChannel(token, channelName, uid, {
-      // Set channel profile to live broadcast
       channelProfile: ChannelProfileType.ChannelProfileCommunication,
-      // Set user role to audience
       clientRoleType: ClientRoleType.ClientRoleAudience,
-      // Do not publish audio collected by the microphone
       publishMicrophoneTrack: true,
-      // Do not publish video collected by the camera
       publishCameraTrack: true,
-      // Automatically subscribe to all audio streams
       autoSubscribeAudio: true,
-      // Automatically subscribe to all video streams
       autoSubscribeVideo: true,
     });
-    nav.navigate('VPreview');
   }
 
   function leaveChanel() {

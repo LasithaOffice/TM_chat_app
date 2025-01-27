@@ -7,7 +7,6 @@ import Login from '../screens/login';
 import CreateAccount from '../screens/createAccount';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Home from '../screens/home';
-import VideoCall from '../screens/videoCall';
 import VPreview from '../screens/videoCall/preview';
 import Avatar from '../components/avatar';
 import { Icon } from '@rneui/base';
@@ -18,6 +17,7 @@ import { CallObject } from '../entity/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CallList from '../screens/callList';
 import VoiceCall from '../screens/voiceCall';
+import VideoCall from '../screens/videoCall/index2';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,7 +27,6 @@ const MainNavigation = () => {
 
   // const a = new Animated.Value((height));
   const a = useRef(new Animated.Value(height)).current;
-  const gap = useSafeAreaInsets();
 
   function callComes() {
     console.log("call starts ", user.user.displayName)
@@ -86,11 +85,19 @@ const MainNavigation = () => {
       .set({
         status: "incall"
       })
-    nav.navigate('VoiceCall', {
-      callerName: callObject?.callerName,
-      callerAvatar: callObject?.callerAvatar,
-      callerId: callObject?.callerId,
-    })
+    if (callObject?.type == 'video') {
+      nav.navigate('VideoCall', {
+        callerName: callObject?.callerName,
+        callerAvatar: callObject?.callerAvatar,
+        callerId: callObject?.callerId,
+      })
+    } else {
+      nav.navigate('VoiceCall', {
+        callerName: callObject?.callerName,
+        callerAvatar: callObject?.callerAvatar,
+        callerId: callObject?.callerId,
+      })
+    }
   }
 
   useEffect(() => {
