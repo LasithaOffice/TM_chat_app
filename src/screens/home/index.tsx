@@ -26,7 +26,7 @@ const Home = () => {
           nav.navigate('VoiceCall');
         }} /></View>
         <View style={{ flex: 0.48 }}><Button icon={{ name: 'phone-call', type: 'feather' }} dark title='Call' onPress={() => {
-          nav.navigate('VoiceCall');
+          nav.navigate('CallList');
         }} /></View>
       </View>
       {/* <View style={{ marginHorizontal: 10, marginTop: 15 }}><Button dark title='New Chat' onPress={() => { }} /></View> */}

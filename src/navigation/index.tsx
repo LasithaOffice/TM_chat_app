@@ -1,13 +1,13 @@
-import { View, Text, useWindowDimensions, Animated, TouchableOpacity, Vibration } from 'react-native'
+import { View, Text, useWindowDimensions, Animated, TouchableOpacity, Vibration, ToastAndroid } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import { NavigationContainer } from '@react-navigation/native'
+import { NavigationContainer, useNavigation } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from '../screens/login';
 import CreateAccount from '../screens/createAccount';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Home from '../screens/home';
-import VoiceCall from '../screens/voiceCall';
+import VoiceCall from '../screens/callList';
 import VideoCall from '../screens/videoCall';
 import VPreview from '../screens/videoCall/preview';
 import Avatar from '../components/avatar';
@@ -17,6 +17,7 @@ import { getUser } from '../redux/slices/userSlice';
 import { rdb } from '../firebase/firebaseInit';
 import { CallObject } from '../entity/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import CallList from '../screens/callList';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,48 +25,40 @@ const MainNavigation = () => {
 
   const { width, height } = useWindowDimensions();
 
-  const a = new Animated.Value((height + 20) * 10 / 10);
+  // const a = new Animated.Value((height));
+  const a = useRef(new Animated.Value(height)).current;
   const gap = useSafeAreaInsets();
 
   function callComes() {
+    console.log("call starts ", user.user.displayName)
+    //ToastAndroid.show("comes", ToastAndroid.SHORT)
+    // console.log("new height ", (height - 60 - gap.bottom), (height - 60 + gap.bottom))
     Animated.spring(a, {
-      speed: 10,
-      toValue: (height - 40 + gap.bottom) * 9 / 10,
+      speed: 1,
+      toValue: (height - 100),
       useNativeDriver: true,
     }).start();
   }
 
   function callEnds() {
+    console.log("hideeeee")
+    //ToastAndroid.show("ends", ToastAndroid.SHORT)
     Animated.spring(a, {
-      speed: 10,
-      toValue: (height + 20) * 10 / 10,
+      speed: 1,
+      toValue: (height),
       useNativeDriver: true,
     }).start();
-    rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_"))
-      .set({
-        status: "ended"
-      })
     // rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_"))
-    //       .on('value', snapshot => {
-    //         console.log('Call data: ', snapshot.val());
-    //         const call: CallObject = snapshot.val() as CallObject;
-    //         if (call) {
-    //           if (call.status == 'incoming') {
-    //             setCallerName(call.callerName)
-    //             Vibration.vibrate(PATTERN, true)
-    //             callComes();
-    //           } else if (call.status == 'ended') {
-    //             callEnds();
-    //             Vibration.cancel();
-    //           }
-    //         }
-    //       });
+    //   .set({
+    //     status: "ended"
+    //   })
   }
 
   const user = useSelector(getUser);
   const callRef = useRef<any>();
+  const nav: any = useNavigation();
 
-  const [callerName, setCallerName] = useState("");
+  const [callObject, setCallObject] = useState<CallObject | null>(null);
 
   const PATTERN = [
     1 * 1000,
@@ -73,21 +66,40 @@ const MainNavigation = () => {
     3 * 1000,
   ];
 
+  function answerCall() {
+    Animated.spring(a, {
+      speed: 1,
+      toValue: (height),
+      useNativeDriver: true,
+    }).start();
+    rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+      .set({
+        status: "incall"
+      })
+    nav.navigate('VoiceCall', {
+      callerName: callObject?.callerName,
+      callerAvatar: callObject?.callerAvatar,
+      callerId: callObject?.callerId,
+    })
+  }
+
   useEffect(() => {
     if (user) {
       if (user.user.displayName) {
-        console.log()
+        //callComes();
         callRef.current = rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_"))
           .on('value', snapshot => {
             console.log('Call data: ', snapshot.val());
             const call: CallObject = snapshot.val() as CallObject;
             if (call) {
               if (call.status == 'incoming') {
-                setCallerName(call.callerName)
+                setCallObject(call);
                 Vibration.vibrate(PATTERN, true)
                 callComes();
               } else if (call.status == 'ended') {
                 callEnds();
+                Vibration.cancel();
+              } else if (call.status == 'incall') {
                 Vibration.cancel();
               }
             }
@@ -100,7 +112,7 @@ const MainNavigation = () => {
   }, [user])
 
   return (
-    <NavigationContainer>
+    <>
       <Stack.Navigator>
         <Stack.Screen name='Login' component={Login} options={
           {
@@ -127,6 +139,11 @@ const MainNavigation = () => {
             headerShown: false
           }
         } />
+        <Stack.Screen name='CallList' component={CallList} options={
+          {
+            headerShown: false
+          }
+        } />
         <Stack.Screen name='VideoCall' component={VideoCall} options={
           {
             headerShown: false
@@ -138,7 +155,11 @@ const MainNavigation = () => {
           }
         } />
       </Stack.Navigator>
-      <View style={{ position: 'absolute', }}>
+      <View style={{
+        position: 'absolute',
+        backgroundColor: 'red',
+        height: height,
+      }}>
         <Animated.View style={{
           width: width - 20,
           height: height / 10,
@@ -152,12 +173,15 @@ const MainNavigation = () => {
           alignItems: 'center',
           padding: 20,
           transform: [{
-            translateY: a
+            translateY: a,
           }],
         }}>
-          <Avatar avt='female_1' />
-          <Text style={{ color: '#fff', marginLeft: 10, fontSize: 16, flex: 1 }}> {"PP is calling"}</Text>
-          <TouchableOpacity onPress={callComes} style={{
+          {
+            (callObject) &&
+            <Avatar avt={callObject.callerAvatar} />
+          }
+          <Text style={{ color: '#fff', marginLeft: 10, fontSize: 16, flex: 1 }}> {callObject?.callerName + " is calling"}</Text>
+          <TouchableOpacity onPress={answerCall} style={{
             width: 40, height: 40,
             backgroundColor: 'red', borderRadius: 100,
             justifyContent: 'center', alignItems: 'center',
@@ -174,7 +198,7 @@ const MainNavigation = () => {
           </TouchableOpacity>
         </Animated.View>
       </View>
-    </NavigationContainer>
+    </>
   )
 }
 

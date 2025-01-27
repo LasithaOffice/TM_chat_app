@@ -6,11 +6,13 @@ import { Icon } from '@rneui/base'
 import { rdb } from '../../firebase/firebaseInit'
 import { useSelector } from 'react-redux'
 import { CallObject } from '../../entity/types'
+import { useNavigation } from '@react-navigation/native'
 
 const UserCard = ({ user, setCaller }: { user: User, setCaller: Function }) => {
 
   const currentUser = useSelector(getUser);
   const [processing, setProcessing] = useState(false);
+  const nav: any = useNavigation();
 
   function initiateAVoiceCall() {
     setProcessing(true);
@@ -22,6 +24,7 @@ const UserCard = ({ user, setCaller }: { user: User, setCaller: Function }) => {
             rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
               .set({
                 callerName: currentUser.user.displayName,
+                callerAvatar: currentUser.user.avatar,
                 callerId: currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"),
                 status: "incoming",
                 type: "voice"
@@ -69,7 +72,7 @@ const UserCard = ({ user, setCaller }: { user: User, setCaller: Function }) => {
       }}>{user.displayName}</Text>
       {
         (processing) ?
-          <ActivityIndicator />
+          <ActivityIndicator style={{ marginRight: 20 }} />
           :
           <>
             <TouchableOpacity onPress={() => {
@@ -79,7 +82,7 @@ const UserCard = ({ user, setCaller }: { user: User, setCaller: Function }) => {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => {
               initiateAVideoCall();
-            }} style={{ marginRight: 10 }}>
+            }} style={{ marginRight: 15 }}>
               <Icon size={20} color={'#fff'} name='video' type='font-awesome-5' />
             </TouchableOpacity>
           </>

@@ -26,6 +26,7 @@ import { store } from './src/redux/store';
 import Avatar from './src/components/avatar';
 import { Icon } from '@rneui/base';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
 
 
 function App(): React.JSX.Element {
@@ -44,7 +45,9 @@ function App(): React.JSX.Element {
             barStyle={'light-content'}
             backgroundColor={backgroundStyle.backgroundColor}
           />
-          <MainNavigation />
+          <NavigationContainer>
+            <MainNavigation />
+          </NavigationContainer>
         </View>
       </SafeAreaProvider>
     </Provider >

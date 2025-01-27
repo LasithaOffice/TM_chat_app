@@ -1,4 +1,4 @@
-import { View, Text, Platform, PermissionsAndroid, StyleSheet, ActivityIndicator, ScrollView, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, Platform, PermissionsAndroid, StyleSheet, ActivityIndicator, ScrollView, FlatList, TouchableOpacity, ToastAndroid } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   createAgoraRtcEngine,
@@ -18,10 +18,9 @@ import { useSelector } from 'react-redux';
 import Avatar from '../../components/avatar';
 import { Icon } from '@rneui/base';
 import { CallObject } from '../../entity/types';
+import { useNavigation } from '@react-navigation/native';
 
-
-
-const VoiceCall = () => {
+const CallList = (p: any) => {
 
   const appId = '79fb6b3a4cd34b79a5e3b60379268854';
   const token = '007eJxTYMgoeZ9cGn2ca+rTTI9nR19ZptZrHk9d3RXX+/HuK06Lvy4KDOaWaUlmScaJJskpxiZJ5paJpqnGSWYGxuaWRmYWFqYmwecmpzcEMjIol4YwMjJAIIjPxVCWn5mcGp+cmJPDwAAAmnUi2Q==';
@@ -43,38 +42,10 @@ const VoiceCall = () => {
 
   const curentUser = useSelector(getUser);
 
-  agoraEngineRef.current = createAgoraRtcEngine();
   const eventHandler = useRef<IRtcEngineEventHandler>();
-  eventHandler.current = {
-    onJoinChannelSuccess: () => {
-      showMessage('Successfully joined channel: ' + channelName);
-      setIsJoined(true);
-    },
-    onUserJoined: (_connection: RtcConnection, uid: number) => {
-      showMessage('Remote user ' + uid + ' has joined');
-      setRemoteUid(uid);
-    },
-    onUserOffline: (_connection: RtcConnection, uid: number) => {
-      showMessage('Remote user ' + uid + ' has left the channel');
-      setRemoteUid(0);
-    },
-  };
-
-  useEffect(() => {
-    const agoraEngine = agoraEngineRef.current;
-    agoraEngine.initialize({
-      appId: appId,
-    });
-    loadUsers();
-    getPermission();
-    agoraEngine.registerEventHandler(eventHandler.current);
-    return () => {
-      agoraEngineRef.current?.unregisterEventHandler(eventHandler.current);
-      agoraEngineRef.current?.release();
-    };
-  }, [])
 
   function createCall() {
+    ToastAndroid.show("created a call", ToastAndroid.SHORT)
     agoraEngineRef.current?.joinChannel(token, channelName, uid, {
       channelProfile: ChannelProfileType.ChannelProfileCommunication,
       clientRoleType: ClientRoleType.ClientRoleBroadcaster,
@@ -84,6 +55,7 @@ const VoiceCall = () => {
   }
 
   function pickCall() {
+    ToastAndroid.show("picked the call", ToastAndroid.SHORT)
     agoraEngineRef.current?.joinChannel(token, channelName, uid, {
       channelProfile: ChannelProfileType.ChannelProfileCommunication,
       clientRoleType: ClientRoleType.ClientRoleAudience,
@@ -100,13 +72,13 @@ const VoiceCall = () => {
   }
 
   const [loading, setLoading] = useState(false);
-
+  const [ending, setEnding] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [caller, setCaller] = useState<User | null>(null);
   const [callerEm, setCallerEm] = useState<string>("");
 
   function loadUsers() {
-    //setLoading(true);
+    setLoading(true);
     loadAllUsers().then(data => {
       console.log("users", Object.values(data.val()))
       setLoading(false);
@@ -117,22 +89,91 @@ const VoiceCall = () => {
   }
 
   const currentCall = useRef<any>();
+  const nav: any = useNavigation();
+
+  const setupVideoSDKEngine = async () => {
+    try {
+      // Create RtcEngine after obtaining device permissions
+      if (Platform.OS === 'android') {
+        await getPermission();
+      }
+      agoraEngineRef.current = createAgoraRtcEngine();
+      const agoraEngine = agoraEngineRef.current;
+      eventHandler.current = {
+        onJoinChannelSuccess: () => {
+          showMessage('Successfully joined channel: ' + channelName);
+          setIsJoined(true);
+        },
+        onUserJoined: (_connection: RtcConnection, uid: number) => {
+          showMessage('Remote user ' + uid + ' joined');
+          setRemoteUid(uid);
+        },
+        onUserOffline: (_connection: RtcConnection, uid: number) => {
+          showMessage('Remote user ' + uid + ' left the channel');
+          setRemoteUid(0);
+        },
+      };
+      // Register the event handler
+      agoraEngine.registerEventHandler(eventHandler.current);
+      // Initialize the engine
+      agoraEngine.initialize({
+        appId: appId,
+      });
+      if ((p.route.params && p.route.params.callerName)) {
+        setCaller({
+          avatar: p.route.params.callerAvatar,
+          displayName: p.route.params.callerName,
+          email: p.route.params.callerId,
+        })
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    setupVideoSDKEngine();
+    if (!(p.route.params && p.route.params.callerName)) {
+      loadUsers()
+    }
+    return () => {
+      agoraEngineRef.current?.unregisterEventHandler(eventHandler.current);
+      agoraEngineRef.current?.release();
+    };
+  }, [])
 
   useEffect(() => {
     if (caller) {
-      setCallerEm(caller.email);
-      currentCall.current = rdb.ref('/calls/' + caller.email.replaceAll("@", "_").replaceAll(".", "_"))
-        .on('value', snapshot => {
-          console.log('Call data: ', snapshot.val());
-          const call: CallObject = snapshot.val() as CallObject;
-          if (call) {
-            if (call.status == 'ended') {
-              setCaller(null);
-            }
-          }
-        });
+      if (!(p.route.params && p.route.params.callerName)) {
+        createCall();
+        setCallerEm(caller.email);
+        // currentCall.current = rdb.ref('/calls/' + caller.email.replaceAll("@", "_").replaceAll(".", "_"))
+        //   .on('value', snapshot => {
+        //     console.log('Call data: ', snapshot.val());
+        //     const call: CallObject = snapshot.val() as CallObject;
+        //     if (call) {
+        //       if (call.status == 'ended') {
+        //         setCaller(null);
+        //       }
+        //     }
+        //   });
+      } else {
+        pickCall();
+        // setCallerEm(caller.email);
+        // currentCall.current = rdb.ref('/calls/' + curentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+        //   .on('value', snapshot => {
+        //     console.log('Call data: ', snapshot.val());
+        //     const call: CallObject = snapshot.val() as CallObject;
+        //     if (call) {
+        //       if (call.status == 'ended') {
+        //         setCaller(null);
+        //         nav.goBack();
+        //       }
+        //     }
+        //   });
+      }
     } else {
-      rdb.ref('/calls/' + callerEm.replaceAll("@", "_").replaceAll(".", "_")).off('value', currentCall.current);
+      // rdb.ref('/calls/' + callerEm.replaceAll("@", "_").replaceAll(".", "_")).off('value', currentCall.current);
     }
   }, [caller])
 
@@ -141,12 +182,33 @@ const VoiceCall = () => {
   }
 
   function endCall() {
+    if (!(p.route.params && p.route.params.callerName)) {
+      if (caller) {
+        setEnding(false);
+        rdb.ref('/calls/' + caller.email.replaceAll("@", "_").replaceAll(".", "_"))
+          .set({
+            status: "ended",
+          }).then(() => {
+            setEnding(false);
+            nav.goBack();
+          });
+      }
+    } else {
+      setEnding(false);
+      rdb.ref('/calls/' + curentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+        .set({
+          status: "ended",
+        }).then(() => {
+          setEnding(false);
+          setCaller(null);
+        });
+    }
     leaveChanel();
   }
 
   return (
     <View style={styles.container}>
-      <Text onPress={leaveChanel} style={styles.mainHeader}>Call</Text>
+      <Text onPress={leaveChanel} style={styles.mainHeader}>Call {message}</Text>
       {/* <Text style={styles.uname}>{"Message " + message}</Text> */}
       {/* <View style={{ width: 20, height: 20, backgroundColor: (isJoined) ? "#008833" : "#992222", margin: 10, borderRadius: 200 }}></View> */}
       {
@@ -190,7 +252,7 @@ const VoiceCall = () => {
                 </View>
                 :
                 <View style={{ alignItems: 'center', marginBlock: 50 }}>
-                  <TouchableOpacity style={{
+                  <TouchableOpacity onPress={endCall} style={{
                     width: 70,
                     height: 70,
                     borderRadius: 100,
@@ -198,7 +260,12 @@ const VoiceCall = () => {
                     justifyContent: 'center',
                     alignItems: 'center'
                   }}>
-                    <Icon name='phone-slash' type='font-awesome-5' color='#fff' size={30} />
+                    {
+                      (ending) ?
+                        <ActivityIndicator size={20} color="#fff" />
+                        :
+                        <Icon name='phone-slash' type='font-awesome-5' color='#fff' size={30} />
+                    }
                   </TouchableOpacity>
                 </View>
             }
@@ -225,7 +292,7 @@ const VoiceCall = () => {
   )
 }
 
-export default VoiceCall
+export default CallList
 
 const styles = StyleSheet.create({
   container: {
