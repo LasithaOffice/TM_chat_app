@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AppDispatch } from '../../redux/store'
 import { Avatars } from '../../entity/types'
+import { iconColor, darkerColor, lightColor } from '../../utilities/colors'
 
 const CreateAccount = () => {
 
@@ -51,12 +52,11 @@ const CreateAccount = () => {
 
   return (
     <View style={styles.container}>
-      {/* <Text style={{ fontSize: 40, textAlign: 'center', marginTop: 50, color: '#fff', fontWeight: '700' }}>{"Create Account"}</Text> */}
       <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
         <TextInput placeholder='Display Name' onChangeText={(v) => {
           setDisplayName(v);
         }} />
-        <Text style={{ marginTop: 20, color: '#fff', fontWeight: '600' }}>Select an avatar</Text>
+        <Text style={{ marginTop: 20, color: iconColor, fontWeight: '600' }}>Select an avatar</Text>
         <View>
           <View style={{ flexDirection: 'row', paddingTop: 20 }}>
             <TouchableOpacity style={{ flex: 1 }} onPress={() => { setAvatar('male_1') }}>
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.darker
   },
   loginButton: {
-    backgroundColor: '#000',
+    backgroundColor: darkerColor,
     height: 45,
     width: '80%',
     borderRadius: 10,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   },
   avatarBordered: {
     borderRadius: 500,
-    borderColor: '#fff',
+    borderColor: iconColor,
     width: 110, height: 110,
     alignItems: 'center',
     justifyContent: 'center'

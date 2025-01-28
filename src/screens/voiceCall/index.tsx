@@ -19,6 +19,7 @@ import Avatar from '../../components/avatar';
 import { Icon } from '@rneui/base';
 import { CallObject } from '../../entity/types';
 import { useNavigation } from '@react-navigation/native';
+import { iconColor, disableColor, voiceColor, lightColor } from '../../utilities/colors';
 
 const VoiceCall = (p: any) => {
 
@@ -188,7 +189,7 @@ const VoiceCall = (p: any) => {
         <View style={{ flex: 1 }}>
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <Avatar avt={caller.avatar} size={100} />
-            <Text style={{ textAlign: 'center', fontSize: 25, fontWeight: '500', color: '#ddd', marginTop: 20 }}>{caller.displayName}</Text>
+            <Text style={{ textAlign: 'center', fontSize: 25, fontWeight: '500', color: lightColor, marginTop: 20 }}>{caller.displayName}</Text>
           </View>
           {
             (remoteUid != 0) ?
@@ -200,15 +201,15 @@ const VoiceCall = (p: any) => {
               }}>
                 <TouchableOpacity onPress={muteUnmuteCall} style={{
                   width: 50, height: 50,
-                  backgroundColor: (isMute) ? '#444' : '#00a2ff', borderRadius: 100,
+                  backgroundColor: (isMute) ? disableColor : voiceColor, borderRadius: 100,
                   justifyContent: 'center', alignItems: 'center',
                   marginRight: 10
                 }}>
                   {
                     (!isMute) ?
-                      <Icon size={30} color={'#fff'} name='unmute' type='octicon' />
+                      <Icon size={30} color={iconColor} name='unmute' type='octicon' />
                       :
-                      <Icon size={30} color={'#fff'} name='mute' type='octicon' />
+                      <Icon size={30} color={iconColor} name='mute' type='octicon' />
                   }
                 </TouchableOpacity>
                 <TouchableOpacity onPress={endCall} style={{
@@ -216,7 +217,7 @@ const VoiceCall = (p: any) => {
                   backgroundColor: 'red', borderRadius: 100,
                   justifyContent: 'center', alignItems: 'center'
                 }}>
-                  <Icon name='phone-slash' type='font-awesome-5' color='#fff' size={20} />
+                  <Icon name='phone-slash' type='font-awesome-5' color={iconColor} size={20} />
                 </TouchableOpacity>
               </View>
               :
@@ -231,9 +232,9 @@ const VoiceCall = (p: any) => {
                 }}>
                   {
                     (ending) ?
-                      <ActivityIndicator size={20} color="#fff" />
+                      <ActivityIndicator size={20} color={iconColor} />
                       :
-                      <Icon name='phone-slash' type='font-awesome-5' color='#fff' size={30} />
+                      <Icon name='phone-slash' type='font-awesome-5' color={iconColor} size={30} />
                   }
                 </TouchableOpacity>
               </View>
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '600',
     marginLeft: 20,
-    color: '#ddd'
+    color: lightColor
   },
   uname: {
     fontSize: 20,

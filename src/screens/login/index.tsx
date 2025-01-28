@@ -9,6 +9,7 @@ import { saveUser } from '../../redux/slices/userSlice'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { rdb } from '../../firebase/firebaseInit'
+import { iconColor, lightColor } from '../../utilities/colors'
 
 const Login = () => {
 
@@ -91,7 +92,7 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 40, textAlign: 'center', marginTop: 50, color: '#fff', fontWeight: '700' }}>{"TM Chat"}</Text>
+      <Text style={{ fontSize: 40, textAlign: 'center', marginTop: 50, color: iconColor, fontWeight: '700' }}>{"TM Chat"}</Text>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', paddingHorizontal: 20 }}>
         {
           (checking) ?

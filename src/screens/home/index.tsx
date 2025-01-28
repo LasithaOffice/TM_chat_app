@@ -1,11 +1,13 @@
-import { View, Text, StyleSheet, Image } from 'react-native'
-import React from 'react'
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
+import React, { useEffect, useLayoutEffect } from 'react'
 import { Colors } from 'react-native/Libraries/NewAppScreen'
 import { useSelector } from 'react-redux'
 import { getUser } from '../../redux/slices/userSlice'
 import Button from '../../components/button'
 import { useNavigation } from '@react-navigation/native'
 import Avatar from '../../components/avatar'
+import { Icon } from '@rneui/base'
+import { iconColor, lightColor } from '../../utilities/colors'
 
 const Home = () => {
 
@@ -14,9 +16,24 @@ const Home = () => {
   const img = '../../resources/images/' + user.user.avatar;
   const nav: any = useNavigation();
 
+  useEffect(() => {
+    nav.setOptions({
+      headerRight: () => (
+        <>
+          <TouchableOpacity onPressOut={() => {
+            nav.navigate('CallHistory');
+            console.log("clicked")
+          }}>
+            <Icon size={20} color={iconColor} name='history' type='fontisto' />
+          </TouchableOpacity>
+        </>
+      )
+    });
+  }, [nav]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.mainHeader}>TM Chat</Text>
+      {/* <Text style={styles.mainHeader}>TM Chat</Text> */}
       <View style={{ alignItems: 'center', flexDirection: 'row', marginTop: 10 }}>
         <Avatar avt={user.user.avatar} size={40} marginLeft={10} />
         <Text style={styles.uname}>{"Welcome " + user.user.displayName}</Text>
@@ -45,7 +62,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: '600',
     marginLeft: 10,
-    color: '#ddd'
+    color: lightColor
   },
   uname: {
     fontSize: 20,

@@ -1,11 +1,9 @@
-import { View, Text, useWindowDimensions, Animated, TouchableOpacity, Vibration, ToastAndroid } from 'react-native'
+import { View, Text, useWindowDimensions, Animated, TouchableOpacity, Vibration } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import { NavigationContainer, useNavigation } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
+import { useNavigation } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from '../screens/login';
 import CreateAccount from '../screens/createAccount';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Home from '../screens/home';
 import VPreview from '../screens/videoCall/preview';
 import Avatar from '../components/avatar';
@@ -14,10 +12,12 @@ import { useSelector } from 'react-redux';
 import { getUser } from '../redux/slices/userSlice';
 import { rdb } from '../firebase/firebaseInit';
 import { CallObject } from '../entity/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CallList from '../screens/callList';
 import VoiceCall from '../screens/voiceCall';
 import VideoCall from '../screens/videoCall';
+import { darkerColor, iconColor, lightColor, videoColor, voiceColor } from '../utilities/colors';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
+import CallHistory from '../screens/callHistory';
 
 const Stack = createNativeStackNavigator();
 
@@ -140,15 +140,25 @@ const MainNavigation = () => {
           {
             title: "Create Account",
             headerStyle: {
-              backgroundColor: '#111',
+              backgroundColor: darkerColor,
             },
-            statusBarBackgroundColor: '#111',
-            headerTintColor: '#fff'
+            statusBarBackgroundColor: darkerColor,
+            headerTintColor: iconColor
           }
         } />
         <Stack.Screen name='Home' component={Home} options={
           {
-            headerShown: false
+            // headerShown: true
+            title: "TM Chats",
+            headerStyle: {
+              backgroundColor: darkerColor,
+            },
+            statusBarBackgroundColor: darkerColor,
+            headerTintColor: iconColor,
+            headerTitleStyle: {
+              fontSize: 24,
+              fontWeight: 'bold',
+            }
           }
         } />
         <Stack.Screen name='VoiceCall' component={VoiceCall} options={
@@ -158,7 +168,22 @@ const MainNavigation = () => {
         } />
         <Stack.Screen name='CallList' component={CallList} options={
           {
-            headerShown: false
+            title: "Contacts",
+            statusBarBackgroundColor: darkerColor,
+            headerTintColor: iconColor,
+            headerStyle: {
+              backgroundColor: darkerColor,
+            },
+          }
+        } />
+        <Stack.Screen name='CallHistory' component={CallHistory} options={
+          {
+            title: "Call History",
+            statusBarBackgroundColor: darkerColor,
+            headerTintColor: iconColor,
+            headerStyle: {
+              backgroundColor: darkerColor,
+            },
           }
         } />
         <Stack.Screen name='VideoCall' component={VideoCall} options={
@@ -197,21 +222,26 @@ const MainNavigation = () => {
             (callObject) &&
             <Avatar avt={callObject.callerAvatar} />
           }
-          <Text style={{ color: '#fff', marginLeft: 10, fontSize: 16, flex: 1 }}> {callObject?.callerName + " is calling"}</Text>
+          <Text style={{ color: iconColor, marginLeft: 10, fontSize: 16, flex: 1 }}> {callObject?.callerName + " is calling"}</Text>
           <TouchableOpacity onPress={answerCall} style={{
             width: 40, height: 40,
-            backgroundColor: 'red', borderRadius: 100,
+            backgroundColor: (callObject?.type == 'video') ? videoColor : voiceColor, borderRadius: 100,
             justifyContent: 'center', alignItems: 'center',
             marginRight: 10
           }}>
-            <Icon size={30} color={'#fff'} name='phone' type='font-awesome' />
+            {
+              (callObject && callObject.type == 'video') ?
+                <Icon size={20} color={iconColor} name='video' type='font-awesome-5' />
+                :
+                <Icon size={30} color={iconColor} name='phone' type='font-awesome' />
+            }
           </TouchableOpacity>
           <TouchableOpacity onPress={endCall} style={{
             width: 40, height: 40,
-            backgroundColor: '#444', borderRadius: 100,
+            backgroundColor: 'red', borderRadius: 100,
             justifyContent: 'center', alignItems: 'center'
           }}>
-            <Icon size={35} color={'#fff'} name='cross' type='entypo' />
+            <Icon size={35} color={iconColor} name='cross' type='entypo' />
           </TouchableOpacity>
         </Animated.View>
       </View>

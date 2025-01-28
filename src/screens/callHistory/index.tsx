@@ -7,8 +7,9 @@ import UserCard from '../../components/userCard';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { lightColor } from '../../utilities/colors';
+import CallLogItem from '../../components/callLogItem';
 
-const CallList = () => {
+const CallHistory = () => {
 
   const curentUser = useSelector(getUser);
   const [loading, setLoading] = useState(false);
@@ -43,7 +44,7 @@ const CallList = () => {
             keyExtractor={(item, index) => index.toString()}
             data={users}
             renderItem={({ item }) =>
-              <UserCard user={item} key={item.email} />
+              <CallLogItem date='2 hours ago' log='missed call' user={item} key={item.email} />
             }
           />
       }
@@ -51,7 +52,7 @@ const CallList = () => {
   )
 }
 
-export default CallList
+export default CallHistory
 
 const styles = StyleSheet.create({
   container: {

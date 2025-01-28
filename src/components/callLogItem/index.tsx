@@ -9,7 +9,13 @@ import { CallObject } from '../../entity/types'
 import { useNavigation } from '@react-navigation/native'
 import { iconColor, lightColor } from '../../utilities/colors'
 
-const UserCard = ({ user, }: { user: User }) => {
+type Props = {
+  user: User,
+  log: string,
+  date: string
+}
+
+const CallLogItem = (p: Props) => {
 
   const currentUser = useSelector(getUser);
   const [processing, setProcessing] = useState(false);
@@ -17,12 +23,12 @@ const UserCard = ({ user, }: { user: User }) => {
 
   function initiateAVoiceCall() {
     setProcessing(true);
-    rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+    rdb.ref('/calls/' + p.user.email.replaceAll("@", "_").replaceAll(".", "_"))
       .once('value', (snapshot) => {
         const call: CallObject = snapshot.val() as CallObject;
         if (call) {
           if (call.status == 'ended') {
-            rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+            rdb.ref('/calls/' + p.user.email.replaceAll("@", "_").replaceAll(".", "_"))
               .set({
                 callerName: currentUser.user.displayName,
                 callerAvatar: currentUser.user.avatar,
@@ -33,9 +39,9 @@ const UserCard = ({ user, }: { user: User }) => {
               .then(() => {
                 setProcessing(false);
                 nav.navigate('VoiceCall', {
-                  callerName: user.displayName,
-                  callerAvatar: user.avatar,
-                  callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+                  callerName: p.user.displayName,
+                  callerAvatar: p.user.avatar,
+                  callerId: p.user.email.replaceAll("@", "_").replaceAll(".", "_"),
                   act: "sender",
                 })
               });
@@ -44,7 +50,7 @@ const UserCard = ({ user, }: { user: User }) => {
             ToastAndroid.show("Already in a call!", ToastAndroid.SHORT);
           }
         } else {
-          rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+          rdb.ref('/calls/' + p.user.email.replaceAll("@", "_").replaceAll(".", "_"))
             .set({
               callerName: currentUser.user.displayName,
               callerAvatar: currentUser.user.avatar,
@@ -55,9 +61,9 @@ const UserCard = ({ user, }: { user: User }) => {
             .then(() => {
               setProcessing(false);
               nav.navigate('VoiceCall', {
-                callerName: user.displayName,
-                callerAvatar: user.avatar,
-                callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+                callerName: p.user.displayName,
+                callerAvatar: p.user.avatar,
+                callerId: p.user.email.replaceAll("@", "_").replaceAll(".", "_"),
                 act: "sender",
               })
             });
@@ -67,12 +73,12 @@ const UserCard = ({ user, }: { user: User }) => {
 
   function initiateAVideoCall() {
     setProcessing(true);
-    rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+    rdb.ref('/calls/' + p.user.email.replaceAll("@", "_").replaceAll(".", "_"))
       .once('value', (snapshot) => {
         const call: CallObject = snapshot.val() as CallObject;
         if (call) {
           if (call.status == 'ended') {
-            rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+            rdb.ref('/calls/' + p.user.email.replaceAll("@", "_").replaceAll(".", "_"))
               .set({
                 callerName: currentUser.user.displayName,
                 callerAvatar: currentUser.user.avatar,
@@ -83,9 +89,9 @@ const UserCard = ({ user, }: { user: User }) => {
               .then(() => {
                 setProcessing(false);
                 nav.navigate('VideoCall', {
-                  callerName: user.displayName,
-                  callerAvatar: user.avatar,
-                  callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+                  callerName: p.user.displayName,
+                  callerAvatar: p.user.avatar,
+                  callerId: p.user.email.replaceAll("@", "_").replaceAll(".", "_"),
                   act: "sender",
                 })
               });
@@ -94,7 +100,7 @@ const UserCard = ({ user, }: { user: User }) => {
             ToastAndroid.show("Already in a call!", ToastAndroid.SHORT);
           }
         } else {
-          rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+          rdb.ref('/calls/' + p.user.email.replaceAll("@", "_").replaceAll(".", "_"))
             .set({
               callerName: currentUser.user.displayName,
               callerAvatar: currentUser.user.avatar,
@@ -105,9 +111,9 @@ const UserCard = ({ user, }: { user: User }) => {
             .then(() => {
               setProcessing(false);
               nav.navigate('VideoCall', {
-                callerName: user.displayName,
-                callerAvatar: user.avatar,
-                callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+                callerName: p.user.displayName,
+                callerAvatar: p.user.avatar,
+                callerId: p.user.email.replaceAll("@", "_").replaceAll(".", "_"),
                 act: "sender",
               })
             });
@@ -117,13 +123,13 @@ const UserCard = ({ user, }: { user: User }) => {
 
   return (
     <View style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center' }}>
-      <Avatar avt={user.avatar} size={40} marginLeft={10} />
+      <Avatar avt={p.user.avatar} size={40} marginLeft={10} />
       <Text style={{
         marginLeft: 10,
         fontSize: 16,
         color: lightColor,
         flex: 1
-      }}>{user.displayName}</Text>
+      }}>{p.user.displayName}</Text>
       {
         (processing) ?
           <ActivityIndicator style={{ marginRight: 20 }} />
@@ -145,4 +151,4 @@ const UserCard = ({ user, }: { user: User }) => {
   )
 }
 
-export default UserCard
+export default CallLogItem

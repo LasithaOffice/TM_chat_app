@@ -16,6 +16,7 @@ import { useSelector } from 'react-redux';
 import { Icon } from '@rneui/base';
 import { CallObject } from '../../entity/types';
 import { useNavigation } from '@react-navigation/native';
+import { iconColor, disableColor, videoColor, lightColor } from '../../utilities/colors';
 
 const VideoCall = (p: any) => {
 
@@ -239,30 +240,30 @@ const VideoCall = (p: any) => {
           </ScrollView>
           <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={muteUnmuteCall} style={[styles.switchButton, {
-              backgroundColor: (isMute) ? '#444' : '#00a2ff',
+              backgroundColor: (isMute) ? disableColor : videoColor,
             }]}>
               {
                 (!isMute) ?
-                  <Icon size={30} color={'#fff'} name='unmute' type='octicon' />
+                  <Icon size={30} color={iconColor} name='unmute' type='octicon' />
                   :
-                  <Icon size={30} color={'#fff'} name='mute' type='octicon' />
+                  <Icon size={30} color={iconColor} name='mute' type='octicon' />
               }
             </TouchableOpacity>
             <TouchableOpacity onPress={offCamera} style={[styles.switchButton, {
-              backgroundColor: (videoDisable) ? '#444' : '#00a2ff',
+              backgroundColor: (videoDisable) ? disableColor : videoColor,
             }]}>
               {
                 (!videoDisable) ?
-                  <Icon size={30} color={'#fff'} name='video' type='feather' />
+                  <Icon size={30} color={iconColor} name='video' type='feather' />
                   :
-                  <Icon size={30} color={'#fff'} name='video-off' type='feather' />
+                  <Icon size={30} color={iconColor} name='video-off' type='feather' />
               }
             </TouchableOpacity>
             <TouchableOpacity onPress={changeCam} style={styles.grayButton}>
-              <Icon size={30} color={'#fff'} name='camera-reverse-outline' type='ionicon' />
+              <Icon size={30} color={iconColor} name='camera-reverse-outline' type='ionicon' />
             </TouchableOpacity>
             <TouchableOpacity onPress={endCall} style={styles.redButton}>
-              <Icon name='phone-slash' type='font-awesome-5' color='#fff' size={20} />
+              <Icon name='phone-slash' type='font-awesome-5' color={iconColor} size={20} />
             </TouchableOpacity>
           </View>
         </View>
@@ -282,7 +283,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '600',
     marginLeft: 20,
-    color: '#ddd'
+    color: lightColor
   },
   uname: {
     fontSize: 20,
@@ -324,7 +325,7 @@ const styles = StyleSheet.create({
   },
   grayButton: {
     width: 50, height: 50,
-    backgroundColor: '#444',
+    backgroundColor: disableColor,
     borderRadius: 100,
     justifyContent: 'center', alignItems: 'center',
     marginRight: 10

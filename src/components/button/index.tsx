@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
 import React from 'react'
 import { Icon } from '@rneui/base'
+import { darkerColor, lightColor } from '../../utilities/colors'
 
 type Props = {
   title: string,
@@ -19,7 +20,7 @@ type Props = {
 const Button = (p: Props) => {
   return (
     <TouchableOpacity activeOpacity={0.7} onPress={p.onPress} style={[styles.loginButton, {
-      backgroundColor: (p.dark) ? '#111' : '#ddd',
+      backgroundColor: (p.dark) ? darkerColor : lightColor,
       marginBottom: (p.marginBottom) ? p.marginBottom : 0,
       marginHorizontal: (p.marginHorizontal) ? p.marginHorizontal : 0,
 
@@ -31,9 +32,9 @@ const Button = (p: Props) => {
           <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
             {
               (p.icon) &&
-              <Icon size={20} color={(p.dark) ? '#ddd' : '#000'} name={p.icon.name} type={p.icon.type} style={{ marginRight: 10 }} />
+              <Icon size={20} color={(p.dark) ? lightColor : darkerColor} name={p.icon.name} type={p.icon.type} style={{ marginRight: 10 }} />
             }
-            <Text style={{ color: (p.dark) ? '#ddd' : '#000', fontSize: 16, textAlign: 'center' }}>{p.title}</Text>
+            <Text style={{ color: (p.dark) ? lightColor : darkerColor, fontSize: 16, textAlign: 'center' }}>{p.title}</Text>
           </View>
       }
     </TouchableOpacity>
@@ -44,7 +45,7 @@ export default Button
 
 const styles = StyleSheet.create({
   loginButton: {
-    backgroundColor: '#ddd',
+    backgroundColor: lightColor,
     height: 45,
     width: '100%',
     borderRadius: 10,
