@@ -1,13 +1,14 @@
 import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { loadAllUsers } from '../../utilities/CommonFunction';
+import { loadAllUsers, loadCallLog } from '../../utilities/CommonFunction';
 import { getUser, User } from '../../redux/slices/userSlice';
 import UserCard from '../../components/userCard';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { lightColor } from '../../utilities/colors';
 import CallLogItem from '../../components/callLogItem';
+import LoadingContainer from '../../components/loadingContainer';
 
 const CallHistory = () => {
 
@@ -15,13 +16,15 @@ const CallHistory = () => {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
 
-  function loadUsers() {
+  function loadCallLogs() {
     setLoading(true);
-    loadAllUsers().then(data => {
-      console.log("users", Object.values(data.val()))
+    console.log("call logs", curentUser.user.email)
+    loadCallLog(curentUser.user.email.replaceAll("@", "_").replaceAll(".", "_")).then(data => {
+      console.log("data", data.val())
       setLoading(false);
-      setUsers((Object.values(data.val()) as User[]).filter((u: User) => u.email != curentUser.user.email) as User[]);
+      // setUsers((Object.values(data.val()) as User[]).filter((u: User) => u.email != curentUser.user.email) as User[]);
     }).catch(e => {
+      console.log(e + "")
       setLoading(false);
     });
   }
@@ -29,7 +32,7 @@ const CallHistory = () => {
   const nav: any = useNavigation();
 
   useEffect(() => {
-    loadUsers()
+    loadCallLogs()
   }, [])
 
   return (
@@ -37,7 +40,7 @@ const CallHistory = () => {
       {/* <Text style={styles.mainHeader}>Call</Text> */}
       {
         (loading) ?
-          <ActivityIndicator />
+          <LoadingContainer />
           :
           <FlatList
             style={{ width: '100%', }}

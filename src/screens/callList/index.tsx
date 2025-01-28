@@ -7,6 +7,7 @@ import UserCard from '../../components/userCard';
 import { useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { lightColor } from '../../utilities/colors';
+import LoadingContainer from '../../components/loadingContainer';
 
 const CallList = () => {
 
@@ -36,7 +37,7 @@ const CallList = () => {
       {/* <Text style={styles.mainHeader}>Call</Text> */}
       {
         (loading) ?
-          <ActivityIndicator />
+          <LoadingContainer />
           :
           <FlatList
             style={{ width: '100%', }}

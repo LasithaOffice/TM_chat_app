@@ -1,12 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ToastAndroid } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Colors } from 'react-native/Libraries/NewAppScreen'
 import Button from '../../components/button'
 import { onGoogleButtonPress } from '../../utilities/GoogleSignIn'
 import { useDispatch } from 'react-redux'
 import { AppDispatch } from '../../redux/store'
 import { saveUser } from '../../redux/slices/userSlice'
-import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { rdb } from '../../firebase/firebaseInit'
 import { iconColor, lightColor } from '../../utilities/colors'
@@ -22,7 +22,6 @@ const Login = () => {
     console.log('start login process')
     setIsLogin(true);
     onGoogleButtonPress().then((r) => {
-      setIsLogin(false);
       console.log(r)
       if (r.user) {
         console.log(r.user.displayName)
@@ -30,6 +29,7 @@ const Login = () => {
           .once('value')
           .then(snapshot => {
             if (snapshot.exists()) {
+              AsyncStorage.setItem('email', r.user.email + "");
               const u = snapshot.val();
               console.log({
                 email: r.user.email + "",
@@ -55,6 +55,7 @@ const Login = () => {
       }
     }).catch((err) => {
       console.log(err)
+      ToastAndroid.show("Please check the internet connection", ToastAndroid.SHORT)
       setIsLogin(false);
     })
   }
@@ -98,7 +99,14 @@ const Login = () => {
           (checking) ?
             <ActivityIndicator style={{ marginBottom: 40 }} />
             :
-            <Button onPress={loginProcess} title='Join with Google' marginBottom={40} loading={isLogin} />
+            <Button
+              icon={
+                {
+                  name: "google",
+                  type: "antdesign"
+                }
+              }
+              onPress={loginProcess} title='Join with Google' marginBottom={40} loading={isLogin} />
         }
       </View>
     </View>

@@ -18,6 +18,7 @@ import VideoCall from '../screens/videoCall';
 import { darkerColor, iconColor, lightColor, videoColor, voiceColor } from '../utilities/colors';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import CallHistory from '../screens/callHistory';
+import Settings from '../screens/settings';
 
 const Stack = createNativeStackNavigator();
 
@@ -179,6 +180,16 @@ const MainNavigation = () => {
         <Stack.Screen name='CallHistory' component={CallHistory} options={
           {
             title: "Call History",
+            statusBarBackgroundColor: darkerColor,
+            headerTintColor: iconColor,
+            headerStyle: {
+              backgroundColor: darkerColor,
+            },
+          }
+        } />
+        <Stack.Screen name='Settings' component={Settings} options={
+          {
+            title: "Settings",
             statusBarBackgroundColor: darkerColor,
             headerTintColor: iconColor,
             headerStyle: {

@@ -1,13 +1,14 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
-import React, { useEffect, useLayoutEffect } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect } from 'react'
 import { Colors } from 'react-native/Libraries/NewAppScreen'
 import { useSelector } from 'react-redux'
 import { getUser } from '../../redux/slices/userSlice'
 import Button from '../../components/button'
-import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import Avatar from '../../components/avatar'
 import { Icon } from '@rneui/base'
 import { iconColor, lightColor } from '../../utilities/colors'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const Home = () => {
 
@@ -19,17 +20,32 @@ const Home = () => {
   useEffect(() => {
     nav.setOptions({
       headerRight: () => (
-        <>
-          <TouchableOpacity onPressOut={() => {
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity style={{ marginRight: 15 }} onPressOut={() => {
             nav.navigate('CallHistory');
             console.log("clicked")
           }}>
             <Icon size={20} color={iconColor} name='history' type='fontisto' />
           </TouchableOpacity>
-        </>
+          <TouchableOpacity onPressOut={() => {
+            nav.navigate('Settings');
+            console.log("clicked")
+          }}>
+            <Icon size={25} color={iconColor} name='settings' type='simple-line-icon' />
+          </TouchableOpacity>
+        </View>
       )
     });
   }, [nav]);
+
+
+  useFocusEffect(useCallback(() => {
+    AsyncStorage.getItem('email').then((r) => {
+      if (!r) {
+        nav.replace('Login')
+      }
+    })
+  }, []))
 
   return (
     <View style={styles.container}>
