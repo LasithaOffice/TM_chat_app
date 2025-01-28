@@ -17,7 +17,7 @@ import { CallObject } from '../entity/types';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CallList from '../screens/callList';
 import VoiceCall from '../screens/voiceCall';
-import VideoCall from '../screens/videoCall/index2';
+import VideoCall from '../screens/videoCall';
 
 const Stack = createNativeStackNavigator();
 
