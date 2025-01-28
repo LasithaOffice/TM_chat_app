@@ -9,20 +9,23 @@ import { useNavigation } from '@react-navigation/native';
 import { lightColor } from '../../utilities/colors';
 import CallLogItem from '../../components/callLogItem';
 import LoadingContainer from '../../components/loadingContainer';
+import { CallLog } from '../../entity/types';
 
 const CallHistory = () => {
 
   const curentUser = useSelector(getUser);
   const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
+  const [callLogs, setCallLogs] = useState<CallLog[]>([]);
 
   function loadCallLogs() {
     setLoading(true);
     console.log("call logs", curentUser.user.email)
     loadCallLog(curentUser.user.email.replaceAll("@", "_").replaceAll(".", "_")).then(data => {
-      console.log("data", data.val())
-      setLoading(false);
-      // setUsers((Object.values(data.val()) as User[]).filter((u: User) => u.email != curentUser.user.email) as User[]);
+      if (data.exists()) {
+        console.log("data", data.val())
+        setLoading(false);
+        setCallLogs((Object.values(data.val()) as CallLog[]));
+      }
     }).catch(e => {
       console.log(e + "")
       setLoading(false);
@@ -45,9 +48,9 @@ const CallHistory = () => {
           <FlatList
             style={{ width: '100%', }}
             keyExtractor={(item, index) => index.toString()}
-            data={users}
+            data={callLogs}
             renderItem={({ item }) =>
-              <CallLogItem date='2 hours ago' log='missed call' user={item} key={item.email} />
+              <CallLogItem callLog={item} key={item.email} />
             }
           />
       }

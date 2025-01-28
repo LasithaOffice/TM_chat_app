@@ -4,3 +4,4 @@ export const disableColor: string = "#444";
 export const iconColor: string = "#fff";
 export const lightColor: string = "#ddd";
 export const darkerColor: string = "#111";
+export const errorcolor: string = "#e03838";

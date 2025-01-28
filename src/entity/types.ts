@@ -7,3 +7,14 @@ export interface CallObject {
   status: "incoming" | "ended" | "incall",
   type: "voice" | "video"
 }
+
+export interface CallLog {
+  displayName: string
+  avatar: Avatars
+  email: string
+  en_time: number
+  role: "sender" | "receiver",
+  type: "voice" | "video",
+  st_time: number
+  status: "connected" | "missed"
+}
