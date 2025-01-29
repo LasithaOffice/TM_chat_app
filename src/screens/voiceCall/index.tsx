@@ -1,4 +1,4 @@
-import { View, Text, Platform, PermissionsAndroid, StyleSheet, ActivityIndicator, ScrollView, FlatList, TouchableOpacity, ToastAndroid } from 'react-native'
+import { View, Text, Platform, PermissionsAndroid, StyleSheet, ActivityIndicator, TouchableOpacity, DeviceEventEmitter } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   createAgoraRtcEngine,
@@ -9,23 +9,24 @@ import {
   IRtcEngineEventHandler,
 } from 'react-native-agora';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import Button from '../../components/button';
 import { rdb } from '../../firebase/firebaseInit';
-import { loadAllUsers } from '../../utilities/CommonFunction';
 import { getUser, User } from '../../redux/slices/userSlice';
-import UserCard from '../../components/userCard';
 import { useSelector } from 'react-redux';
 import Avatar from '../../components/avatar';
 import { Icon } from '@rneui/base';
 import { CallObject } from '../../entity/types';
 import { useNavigation } from '@react-navigation/native';
 import { iconColor, disableColor, voiceColor, lightColor } from '../../utilities/colors';
+import { getAgoraToken } from '../../redux/slices/agoraDataSlice';
 
 const VoiceCall = (p: any) => {
 
-  const appId = '79fb6b3a4cd34b79a5e3b60379268854';
-  const token = '007eJxTYMjKelkVtqhpVtDbDyvr8i7OL1XdGGXv+5pfRG0y38RPGyYrMJhbpiWZJRknmiSnGJskmVsmmqYaJ5kZGJtbGplZWJiavDCbnt4QyMgwa8J0VkYGCATxuRjK8jOTU+OTE3NyGBgAZWoiow==';
-  const channelName = 'voice_call';
+  const agoraData = useSelector(getAgoraToken);
+
+  const appId = agoraData.data.appId;
+  const token = agoraData.data.token;
+  const channelName = agoraData.data.channelName;
+  const timeStamp = useRef(new Date().getTime());
   const uid = 0; // Local user UID, no need to modify
 
   const getPermission = async () => {
@@ -39,7 +40,6 @@ const VoiceCall = (p: any) => {
   const agoraEngineRef = useRef<IRtcEngine>();
   const [message, showMessage] = useState("")
   const [remoteUid, setRemoteUid] = useState(0);
-
   const curentUser = useSelector(getUser);
   const eventHandler = useRef<IRtcEngineEventHandler>();
 
@@ -63,14 +63,46 @@ const VoiceCall = (p: any) => {
     });
   }
 
-  function leaveChanel() {
+  function leaveChanel(uid?: number) {
     agoraEngineRef.current?.leaveChannel();
-    setRemoteUid(0);
-    nav.goBack();
+    if ((p.route.params && p.route.params.act == "sender")) {
+      let status = "missed"
+      console.log(remoteUid + " " + uid);
+      if (remoteUid != 0) {
+        status = "connected"
+      }
+      if (uid) {
+        if (uid != 0) {
+          status = "connected"
+        }
+      }
+      rdb.ref('/callLogs/' + p.route.params.callerId + '/' + timeStamp.current).set({
+        status,
+        type: "voice",
+        displayName: curentUser.user.displayName,
+        avatar: curentUser.user.avatar,
+        callerId: curentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"),
+        en_time: new Date().getTime(),
+        st_time: timeStamp.current,
+        role: "receiver",
+      })
+      rdb.ref('/callLogs/' + curentUser.user.email.replaceAll("@", "_").replaceAll(".", "_") + '/' + timeStamp.current).set({
+        status,
+        type: "voice",
+        displayName: p.route.params.callerName,
+        avatar: p.route.params.callerAvatar,
+        callerId: p.route.params.callerId,
+        en_time: new Date().getTime(),
+        st_time: timeStamp.current,
+        role: "sender",
+      })
+    }
+    if (nav.canGoBack()) {
+      nav.goBack();
+    }
     showMessage('You left the channel');
   }
 
-  const [ending, setEnding] = useState(false);
   const [caller, setCaller] = useState<User | null>(null);
 
   const currentCall = useRef<any>();
@@ -91,17 +123,21 @@ const VoiceCall = (p: any) => {
         onUserJoined: (_connection: RtcConnection, uid: number) => {
           showMessage('Remote user ' + uid + ' joined');
           setRemoteUid(uid);
+          if (currentCall.current) {
+            console.log("removed firebase listener")
+            rdb.ref('/calls/' + p.route.params.callerId).off('value', currentCall.current);
+          }
         },
         onUserOffline: (_connection: RtcConnection, uid: number) => {
           showMessage('Remote user ' + uid + ' left the channel');
-          nav.goBack();
+          leaveChanel(uid);
           //ToastAndroid.show("going back", ToastAndroid.SHORT);
-          setRemoteUid(0);
         },
       };
       // Register the event handler
       agoraEngine.registerEventHandler(eventHandler.current);
       // Initialize the engine
+      console.log("init", appId)
       agoraEngine.initialize({
         appId: appId,
       });
@@ -125,10 +161,6 @@ const VoiceCall = (p: any) => {
         agoraEngineRef.current?.unregisterEventHandler(eventHandler.current);
         agoraEngineRef.current?.release();
       }
-      if (currentCall.current) {
-        console.log("removed firebase listener")
-        rdb.ref('/calls/' + caller?.email.replaceAll("@", "_").replaceAll(".", "_")).off('value', currentCall.current);
-      }
     };
   }, [])
 
@@ -136,16 +168,16 @@ const VoiceCall = (p: any) => {
     if (caller) {
       if ((p.route.params && p.route.params.act == "sender")) {
         createCall();
-        currentCall.current = rdb.ref('/calls/' + caller.email.replaceAll("@", "_").replaceAll(".", "_"))
-          .on('value', snapshot => {
-            console.log('Call data: ', snapshot.val());
-            const call: CallObject = snapshot.val() as CallObject;
-            if (call) {
-              if (call.status == 'ended') {
-                leaveChanel();
-              }
+        console.log("init firebase listener ", p.route.params.callerId);
+        currentCall.current = rdb.ref('/calls/' + p.route.params.callerId).on('value', snapshot => {
+          console.log('Call room listener ', snapshot.val());
+          const call: CallObject = snapshot.val() as CallObject;
+          if (call) {
+            if (call.status == 'ended') {
+              leaveChanel();
             }
-          });
+          }
+        });
       } else {
         pickCall();
       }
@@ -164,7 +196,6 @@ const VoiceCall = (p: any) => {
   }
 
   function endCall() {
-    console.log("dataaa ", (p.route.params && p.route.params.act == "sender"), caller)
     if ((p.route.params && p.route.params.act == "sender")) {
       if (caller) {
         rdb.ref('/calls/' + caller.email.replaceAll("@", "_").replaceAll(".", "_"))
@@ -183,7 +214,9 @@ const VoiceCall = (p: any) => {
 
   return (
     <View style={styles.container}>
-      {/* <Text onPress={leaveChanel} style={styles.mainHeader}>{message}</Text> */}
+      {/* <Text onPress={() => {
+        leaveChanel();
+      }} style={styles.mainHeader}>{message}</Text> */}
       {
         (caller) &&
         <View style={{ flex: 1 }}>
@@ -230,12 +263,7 @@ const VoiceCall = (p: any) => {
                   justifyContent: 'center',
                   alignItems: 'center'
                 }}>
-                  {
-                    (ending) ?
-                      <ActivityIndicator size={20} color={iconColor} />
-                      :
-                      <Icon name='phone-slash' type='font-awesome-5' color={iconColor} size={30} />
-                  }
+                  <Icon name='phone-slash' type='font-awesome-5' color={iconColor} size={30} />
                 </TouchableOpacity>
               </View>
           }

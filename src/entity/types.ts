@@ -11,7 +11,7 @@ export interface CallObject {
 export interface CallLog {
   displayName: string
   avatar: Avatars
-  email: string
+  callerId: string
   en_time: number
   role: "sender" | "receiver",
   type: "voice" | "video",

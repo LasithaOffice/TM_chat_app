@@ -19,6 +19,8 @@ const Settings = () => {
     GoogleSignin.signOut().then(r => {
       setLogginOut(false);
       nav.replace("Login");
+    }).catch(e => {
+      console.log("errrrr ", e)
     })
   }
 

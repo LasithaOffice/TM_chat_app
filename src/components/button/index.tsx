@@ -19,11 +19,14 @@ type Props = {
 
 const Button = (p: Props) => {
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={p.onPress} style={[styles.loginButton, {
+    <TouchableOpacity activeOpacity={0.7} onPress={() => {
+      if (!p.loading) {
+        p.onPress();
+      }
+    }} style={[styles.loginButton, {
       backgroundColor: (p.dark) ? darkerColor : lightColor,
       marginBottom: (p.marginBottom) ? p.marginBottom : 0,
       marginHorizontal: (p.marginHorizontal) ? p.marginHorizontal : 0,
-
     }]}>
       {
         (p.loading) ?

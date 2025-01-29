@@ -1,11 +1,10 @@
-import { View, Text, useWindowDimensions, Animated, TouchableOpacity, Vibration } from 'react-native'
+import { View, Text, useWindowDimensions, Animated, TouchableOpacity, Vibration, DeviceEventEmitter } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from '../screens/login';
 import CreateAccount from '../screens/createAccount';
 import Home from '../screens/home';
-import VPreview from '../screens/videoCall/preview';
 import Avatar from '../components/avatar';
 import { Icon } from '@rneui/base';
 import { useSelector } from 'react-redux';
@@ -30,7 +29,7 @@ const MainNavigation = () => {
   const a = useRef(new Animated.Value(height)).current;
 
   function callComes() {
-    console.log("call starts ", user.user.displayName)
+    console.log("call starts ", currentUser.user.displayName)
     //ToastAndroid.show("comes", ToastAndroid.SHORT)
     // console.log("new height ", (height - 60 - gap.bottom), (height - 60 + gap.bottom))
     Animated.spring(a, {
@@ -58,13 +57,14 @@ const MainNavigation = () => {
       useNativeDriver: true,
     }).start();
     Vibration.cancel();
-    rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+    rdb.ref('/calls/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
       .set({
-        status: "ended"
+        status: "ended",
+        // callerId: callObject?.callerId
       })
   }
 
-  const user = useSelector(getUser);
+  const currentUser = useSelector(getUser);
   const callRef = useRef<any>();
   const nav: any = useNavigation();
 
@@ -82,7 +82,7 @@ const MainNavigation = () => {
       toValue: (height),
       useNativeDriver: true,
     }).start();
-    rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+    rdb.ref('/calls/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
       .set({
         status: "incall"
       })
@@ -102,10 +102,10 @@ const MainNavigation = () => {
   }
 
   useEffect(() => {
-    if (user) {
-      if (user.user.displayName) {
+    if (currentUser) {
+      if (currentUser.user.displayName) {
         //callComes();
-        callRef.current = rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+        callRef.current = rdb.ref('/calls/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
           .on('value', snapshot => {
             console.log('Call data: ', snapshot.val());
             const call: CallObject = snapshot.val() as CallObject;
@@ -117,6 +117,9 @@ const MainNavigation = () => {
               } else if (call.status == 'ended') {
                 callEnds();
                 Vibration.cancel();
+                // if (currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_") != call.callerId) {
+                //   DeviceEventEmitter.emit("leaveCall");
+                // }
               } else if (call.status == 'incall') {
                 Vibration.cancel();
               }
@@ -125,9 +128,9 @@ const MainNavigation = () => {
       }
     }
     return () => {
-      rdb.ref('/calls/' + user.user.email.replaceAll("@", "_").replaceAll(".", "_")).off('value', callRef.current);
+      rdb.ref('/calls/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_")).off('value', callRef.current);
     }
-  }, [user])
+  }, [currentUser])
 
   return (
     <>
@@ -198,11 +201,6 @@ const MainNavigation = () => {
           }
         } />
         <Stack.Screen name='VideoCall' component={VideoCall} options={
-          {
-            headerShown: false
-          }
-        } />
-        <Stack.Screen name='VPreview' component={VPreview} options={
           {
             headerShown: false
           }

@@ -7,7 +7,7 @@ import { rdb } from '../../firebase/firebaseInit'
 import { useSelector } from 'react-redux'
 import { CallLog, CallObject } from '../../entity/types'
 import { useNavigation } from '@react-navigation/native'
-import { errorcolor, iconColor, lightColor } from '../../utilities/colors'
+import { darkerColor, disableColor, errorcolor, iconColor, lightColor } from '../../utilities/colors'
 import { duration, timeAgo } from '../../utilities/CommonFunction'
 
 type Props = {
@@ -22,12 +22,12 @@ const CallLogItem = (p: Props) => {
 
   function initiateAVoiceCall() {
     setProcessing(true);
-    rdb.ref('/calls/' + p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"))
+    rdb.ref('/calls/' + p.callLog.callerId)
       .once('value', (snapshot) => {
         const call: CallObject = snapshot.val() as CallObject;
         if (call) {
           if (call.status == 'ended') {
-            rdb.ref('/calls/' + p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"))
+            rdb.ref('/calls/' + p.callLog.callerId)
               .set({
                 callerName: currentUser.user.displayName,
                 callerAvatar: currentUser.user.avatar,
@@ -40,7 +40,7 @@ const CallLogItem = (p: Props) => {
                 nav.navigate('VoiceCall', {
                   callerName: p.callLog.displayName,
                   callerAvatar: p.callLog.avatar,
-                  callerId: p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"),
+                  callerId: p.callLog.callerId,
                   act: "sender",
                 })
               });
@@ -49,7 +49,7 @@ const CallLogItem = (p: Props) => {
             ToastAndroid.show("Already in a call!", ToastAndroid.SHORT);
           }
         } else {
-          rdb.ref('/calls/' + p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"))
+          rdb.ref('/calls/' + p.callLog.callerId)
             .set({
               callerName: currentUser.user.displayName,
               callerAvatar: currentUser.user.avatar,
@@ -62,7 +62,7 @@ const CallLogItem = (p: Props) => {
               nav.navigate('VoiceCall', {
                 callerName: p.callLog.displayName,
                 callerAvatar: p.callLog.avatar,
-                callerId: p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"),
+                callerId: p.callLog.callerId,
                 act: "sender",
               })
             });
@@ -72,12 +72,12 @@ const CallLogItem = (p: Props) => {
 
   function initiateAVideoCall() {
     setProcessing(true);
-    rdb.ref('/calls/' + p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"))
+    rdb.ref('/calls/' + p.callLog.callerId)
       .once('value', (snapshot) => {
         const call: CallObject = snapshot.val() as CallObject;
         if (call) {
           if (call.status == 'ended') {
-            rdb.ref('/calls/' + p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"))
+            rdb.ref('/calls/' + p.callLog.callerId)
               .set({
                 callerName: currentUser.user.displayName,
                 callerAvatar: currentUser.user.avatar,
@@ -90,7 +90,7 @@ const CallLogItem = (p: Props) => {
                 nav.navigate('VideoCall', {
                   callerName: p.callLog.displayName,
                   callerAvatar: p.callLog.avatar,
-                  callerId: p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"),
+                  callerId: p.callLog.callerId,
                   act: "sender",
                 })
               });
@@ -99,7 +99,7 @@ const CallLogItem = (p: Props) => {
             ToastAndroid.show("Already in a call!", ToastAndroid.SHORT);
           }
         } else {
-          rdb.ref('/calls/' + p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"))
+          rdb.ref('/calls/' + p.callLog.callerId)
             .set({
               callerName: currentUser.user.displayName,
               callerAvatar: currentUser.user.avatar,
@@ -112,7 +112,7 @@ const CallLogItem = (p: Props) => {
               nav.navigate('VideoCall', {
                 callerName: p.callLog.displayName,
                 callerAvatar: p.callLog.avatar,
-                callerId: p.callLog.email.replaceAll("@", "_").replaceAll(".", "_"),
+                callerId: p.callLog.callerId,
                 act: "sender",
               })
             });
@@ -121,13 +121,13 @@ const CallLogItem = (p: Props) => {
   }
 
   return (
-    <Pressable onPress={() => {
+    <Pressable android_ripple={{ color: disableColor }} onPress={() => {
       if (p.callLog.type == 'video') {
         initiateAVideoCall();
       } else {
         initiateAVoiceCall();
       }
-    }} style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center' }}>
+    }} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingLeft: 10 }}>
       <Avatar avt={p.callLog.avatar} size={50} marginLeft={10} />
       <View style={{ flex: 1 }}>
         <Text style={{
@@ -135,7 +135,7 @@ const CallLogItem = (p: Props) => {
           fontSize: 20,
           color: lightColor,
         }}>{p.callLog.displayName}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10, marginTop: 5 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10, marginTop: 2 }}>
           {
             (p.callLog.role == 'sender') ?
               (
@@ -161,14 +161,20 @@ const CallLogItem = (p: Props) => {
       </View>
       {
         (p.callLog.type == 'voice') ?
-          <View style={{ marginRight: 20 }}>
+          <View style={{ marginRight: 5, width: 60, }}>
             <Icon size={30} color={iconColor} name='phone' type='font-awesome' />
-            <Text style={{ marginTop: 5, color: lightColor }}>{duration(p.callLog.st_time, p.callLog.en_time)}</Text>
+            {
+              (p.callLog.status == 'connected') &&
+              <Text style={{ marginTop: 5, color: lightColor, textAlign: 'center' }}>{duration(p.callLog.st_time, p.callLog.en_time)}</Text>
+            }
           </View>
           :
-          <View style={{ marginRight: 15 }}>
+          <View style={{ marginRight: 5, width: 60, }}>
             <Icon size={30} color={iconColor} name='video' type='font-awesome-5' />
-            <Text style={{ marginTop: 5, color: lightColor }}>{duration(p.callLog.st_time, p.callLog.en_time)}</Text>
+            {
+              (p.callLog.status == 'connected') &&
+              <Text style={{ marginTop: 5, color: lightColor, textAlign: 'center' }}>{duration(p.callLog.st_time, p.callLog.en_time)}</Text>
+            }
           </View>
       }
     </Pressable>

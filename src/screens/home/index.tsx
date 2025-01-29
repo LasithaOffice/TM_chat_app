@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
-import React, { useCallback, useEffect, useLayoutEffect } from 'react'
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { Colors } from 'react-native/Libraries/NewAppScreen'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { getUser } from '../../redux/slices/userSlice'
 import Button from '../../components/button'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
@@ -9,24 +9,52 @@ import Avatar from '../../components/avatar'
 import { Icon } from '@rneui/base'
 import { iconColor, lightColor } from '../../utilities/colors'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { getAgoraData } from '../../utilities/CommonFunction'
+import { AppDispatch } from '../../redux/store'
+import { AgoraData, saveToken } from '../../redux/slices/agoraDataSlice'
+import { rdb } from '../../firebase/firebaseInit'
 
 const Home = () => {
 
-  const user = useSelector(getUser)
+  const currentUser = useSelector(getUser)
 
-  const img = '../../resources/images/' + user.user.avatar;
+  const img = '../../resources/images/' + currentUser.user.avatar;
   const nav: any = useNavigation();
+
+  const disptch = useDispatch<AppDispatch>();
+
+  const [tokenReceived, setTokenReceived] = useState(false);
+
+  function getAgoraToken() {
+    getAgoraData().then(d => {
+      const data: AgoraData = d.val();
+      console.log("agora data", data)
+      if (d.exists()) {
+        setTokenReceived(true);
+        disptch(saveToken(data))
+      }
+    })
+  }
+
+  useEffect(() => {
+    getAgoraToken();
+  }, [])
 
   useEffect(() => {
     nav.setOptions({
       headerRight: () => (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <TouchableOpacity style={{ marginRight: 15 }} onPressOut={() => {
-            nav.navigate('CallHistory');
-            console.log("clicked")
-          }}>
-            <Icon size={20} color={iconColor} name='history' type='fontisto' />
-          </TouchableOpacity>
+          {
+            (!tokenReceived) ?
+              <ActivityIndicator style={{ marginRight: 15 }} />
+              :
+              <TouchableOpacity style={{ marginRight: 15 }} onPressOut={() => {
+                nav.navigate('CallHistory');
+                console.log("clicked")
+              }}>
+                <Icon size={20} color={iconColor} name='history' type='fontisto' />
+              </TouchableOpacity>
+          }
           <TouchableOpacity onPressOut={() => {
             nav.navigate('Settings');
             console.log("clicked")
@@ -36,7 +64,7 @@ const Home = () => {
         </View>
       )
     });
-  }, [nav]);
+  }, [nav, tokenReceived]);
 
 
   useFocusEffect(useCallback(() => {
@@ -45,20 +73,24 @@ const Home = () => {
         nav.replace('Login')
       }
     })
+    rdb.ref('/calls/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+      .set({
+        status: "ended"
+      })
   }, []))
 
   return (
     <View style={styles.container}>
       {/* <Text style={styles.mainHeader}>TM Chat</Text> */}
       <View style={{ alignItems: 'center', flexDirection: 'row', marginTop: 10 }}>
-        <Avatar avt={user.user.avatar} size={40} marginLeft={10} />
-        <Text style={styles.uname}>{"Welcome " + user.user.displayName}</Text>
+        <Avatar avt={currentUser.user.avatar} size={40} marginLeft={10} />
+        <Text style={styles.uname}>{"Welcome " + currentUser.user.displayName}</Text>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, marginHorizontal: 10 }}>
-        <View style={{ flex: 0.48 }}><Button icon={{ name: 'message1', type: 'antdesign' }} dark title='New Chat' onPress={() => {
+        <View style={{ flex: 0.48 }}><Button loading={!tokenReceived} icon={{ name: 'message1', type: 'antdesign' }} dark title='New Chat' onPress={() => {
           nav.navigate('VideoCall');
         }} /></View>
-        <View style={{ flex: 0.48 }}><Button icon={{ name: 'phone-call', type: 'feather' }} dark title='Call' onPress={() => {
+        <View style={{ flex: 0.48 }}><Button loading={!tokenReceived} icon={{ name: 'phone-call', type: 'feather' }} dark title='Call' onPress={() => {
           nav.navigate('CallList');
         }} /></View>
       </View>

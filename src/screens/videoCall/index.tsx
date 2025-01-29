@@ -17,12 +17,16 @@ import { Icon } from '@rneui/base';
 import { CallObject } from '../../entity/types';
 import { useNavigation } from '@react-navigation/native';
 import { iconColor, disableColor, videoColor, lightColor } from '../../utilities/colors';
+import { getAgoraToken } from '../../redux/slices/agoraDataSlice';
 
 const VideoCall = (p: any) => {
 
-  const appId = '79fb6b3a4cd34b79a5e3b60379268854';
-  const token = '007eJxTYMjKelkVtqhpVtDbDyvr8i7OL1XdGGXv+5pfRG0y38RPGyYrMJhbpiWZJRknmiSnGJskmVsmmqYaJ5kZGJtbGplZWJiavDCbnt4QyMgwa8J0VkYGCATxuRjK8jOTU+OTE3NyGBgAZWoiow==';
-  const channelName = 'voice_call';
+  const agoraData = useSelector(getAgoraToken);
+
+  const appId = agoraData.data.appId;
+  const token = agoraData.data.token;
+  const channelName = agoraData.data.channelName;
+  const timeStamp = useRef(new Date().getTime());
   const uid = 0; // Local user UID, no need to modify
 
   const getPermission = async () => {
@@ -65,10 +69,43 @@ const VideoCall = (p: any) => {
     });
   }
 
-  function leaveChanel() {
+  function leaveChanel(uid?: number) {
     agoraEngineRef.current?.leaveChannel();
-    setRemoteUid(0);
-    nav.goBack();
+    if ((p.route.params && p.route.params.act == "sender")) {
+      let status = "missed"
+      console.log(remoteUid + " " + uid);
+      if (remoteUid != 0) {
+        status = "connected"
+      }
+      if (uid) {
+        if (uid != 0) {
+          status = "connected"
+        }
+      }
+      rdb.ref('/callLogs/' + p.route.params.callerId + '/' + timeStamp.current).set({
+        status,
+        type: "video",
+        displayName: curentUser.user.displayName,
+        avatar: curentUser.user.avatar,
+        callerId: curentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"),
+        en_time: new Date().getTime(),
+        st_time: timeStamp.current,
+        role: "receiver",
+      })
+      rdb.ref('/callLogs/' + curentUser.user.email.replaceAll("@", "_").replaceAll(".", "_") + '/' + timeStamp.current).set({
+        status,
+        type: "video",
+        displayName: p.route.params.callerName,
+        avatar: p.route.params.callerAvatar,
+        callerId: p.route.params.callerId,
+        en_time: new Date().getTime(),
+        st_time: timeStamp.current,
+        role: "sender",
+      })
+    }
+    if (nav.canGoBack()) {
+      nav.goBack();
+    }
     showMessage('You left the channel');
   }
 
@@ -98,10 +135,14 @@ const VideoCall = (p: any) => {
         onUserJoined: (_connection: RtcConnection, uid: number) => {
           showMessage('Remote user ' + uid + ' joined');
           setRemoteUid(uid);
+          if (currentCall.current) {
+            console.log("removed firebase listener")
+            rdb.ref('/calls/' + p.route.params.callerId).off('value', currentCall.current);
+          }
         },
         onUserOffline: (_connection: RtcConnection, uid: number) => {
           showMessage('Remote user ' + uid + ' left the channel');
-          setRemoteUid(0);
+          leaveChanel(uid);
         },
       };
       // Register the event handler
@@ -132,10 +173,6 @@ const VideoCall = (p: any) => {
         agoraEngineRef.current?.unregisterEventHandler(eventHandler.current);
         agoraEngineRef.current?.release();
       }
-      if (currentCall.current) {
-        console.log("removed firebase listener")
-        rdb.ref('/calls/' + caller?.email.replaceAll("@", "_").replaceAll(".", "_")).off('value', currentCall.current);
-      }
     };
   }, [])
 
@@ -143,16 +180,16 @@ const VideoCall = (p: any) => {
     if (caller) {
       if ((p.route.params && p.route.params.act == "sender")) {
         createCall();
-        currentCall.current = rdb.ref('/calls/' + caller.email.replaceAll("@", "_").replaceAll(".", "_"))
-          .on('value', snapshot => {
-            console.log('Call data: ', snapshot.val());
-            const call: CallObject = snapshot.val() as CallObject;
-            if (call) {
-              if (call.status == 'ended') {
-                leaveChanel();
-              }
+        console.log("init firebase listener in video call ", p.route.params.callerId);
+        currentCall.current = rdb.ref('/calls/' + p.route.params.callerId).on('value', snapshot => {
+          console.log('Video room listener ', snapshot.val());
+          const call: CallObject = snapshot.val() as CallObject;
+          if (call) {
+            if (call.status == 'ended') {
+              leaveChanel();
             }
-          });
+          }
+        });
       } else {
         pickCall();
       }

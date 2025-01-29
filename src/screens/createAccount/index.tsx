@@ -40,7 +40,7 @@ const CreateAccount = () => {
           displayName: displayName,
           avatar: avatar
         }))
-        ToastAndroid.show("You have successfully create an account!", ToastAndroid.SHORT);
+        ToastAndroid.show("You have successfully created an account!", ToastAndroid.SHORT);
       }).catch(e => {
         setCreating(false);
         ToastAndroid.show("Error creating account", ToastAndroid.SHORT);

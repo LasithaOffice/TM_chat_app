@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import userSlice from './slices/userSlice'
+import agoraSlice from './slices/agoraDataSlice'
 // ...
 
 export const store = configureStore({
   reducer: {
     user: userSlice,
+    agora: agoraSlice,
   }
 })
 

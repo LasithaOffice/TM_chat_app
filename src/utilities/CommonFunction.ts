@@ -10,6 +10,11 @@ export async function loadCallLog(uid: string) {
     .once('value');
 }
 
+export async function getAgoraData() {
+  return rdb.ref('/agoraKeys/')
+    .once('value');
+}
+
 export function timeAgo(date: number) {
   const now = new Date();
   const postDate = new Date(date);
@@ -32,7 +37,6 @@ export function timeAgo(date: number) {
 export function duration(st: number, en: number) {
   const duration = new Date(en - st);
   const diffInSeconds = (en - st);
-  console.log(`duration: ${diffInSeconds}`);
   if (duration.getUTCMinutes() == 0) return duration.getUTCSeconds() + "s"; // Less than a minute
   if (duration.getUTCHours() == 0) return duration.getUTCMinutes() + "m " + duration.getUTCSeconds() + "s"; // Less than a minute
   return duration.getUTCHours() + "h " + duration.getUTCMinutes() + "m"; // Less than an hour
