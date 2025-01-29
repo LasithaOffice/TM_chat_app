@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native'
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Colors } from 'react-native/Libraries/NewAppScreen'
 import { useDispatch, useSelector } from 'react-redux'
 import { getUser } from '../../redux/slices/userSlice'
@@ -13,6 +13,8 @@ import { getAgoraData } from '../../utilities/CommonFunction'
 import { AppDispatch } from '../../redux/store'
 import { AgoraData, saveToken } from '../../redux/slices/agoraDataSlice'
 import { rdb } from '../../firebase/firebaseInit'
+import { ConversationObj } from '../../entity/types'
+import ChatCard from '../../components/chatCard'
 
 const Home = () => {
 
@@ -24,6 +26,7 @@ const Home = () => {
   const disptch = useDispatch<AppDispatch>();
 
   const [tokenReceived, setTokenReceived] = useState(false);
+  const [chats, setChats] = useState<ConversationObj[]>([])
 
   function getAgoraToken() {
     getAgoraData().then(d => {
@@ -38,6 +41,12 @@ const Home = () => {
 
   useEffect(() => {
     getAgoraToken();
+    loadChatConversations();
+    return () => {
+      if (chatsListener.current) {
+        rdb.ref('/userConversation/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_")).off('value', chatsListener.current)
+      }
+    };
   }, [])
 
   useEffect(() => {
@@ -66,6 +75,18 @@ const Home = () => {
     });
   }, [nav, tokenReceived]);
 
+  const chatsListener = useRef<any>();
+
+  function loadChatConversations() {
+    chatsListener.current = rdb.ref('/userConversation/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+      .on('value', data => {
+        if (data.exists()) {
+          const chts: ConversationObj[] = (Object.values(data.val()) as
+            ConversationObj[]).sort((a, b) => b.timeStamp - a.timeStamp);
+          setChats(chts);
+        }
+      })
+  }
 
   useFocusEffect(useCallback(() => {
     AsyncStorage.getItem('email').then((r) => {
@@ -94,6 +115,13 @@ const Home = () => {
           nav.navigate('CallList');
         }} /></View>
       </View>
+      <FlatList
+        data={chats}
+        keyExtractor={(item) => item.timeStamp.toString()}
+        renderItem={({ index, item }) =>
+          <ChatCard conversation={item} />
+        }
+      />
       {/* <View style={{ marginHorizontal: 10, marginTop: 15 }}><Button dark title='New Chat' onPress={() => { }} /></View> */}
     </View>
   )

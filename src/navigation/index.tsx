@@ -68,6 +68,7 @@ const MainNavigation = () => {
 
   const currentUser = useSelector(getUser);
   const callRef = useRef<any>();
+  const chatRef = useRef<any>();
   const nav: any = useNavigation();
 
   const [callObject, setCallObject] = useState<CallObject | null>(null);
@@ -127,6 +128,10 @@ const MainNavigation = () => {
               }
             }
           });
+        chatRef.current = rdb.ref('/lastMessage/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
+          .on('value', snapShot => {
+
+          })
       }
     }
     return () => {

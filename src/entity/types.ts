@@ -31,3 +31,12 @@ export interface Chatter {
   id: string;
   stat: number;
 }
+
+export interface ConversationObj {
+  avatar: Avatars,
+  displayName: string,
+  message: string,
+  timeStamp: number,
+  conversationId: string,
+  uid: string,
+}

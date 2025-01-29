@@ -2,7 +2,7 @@ import { View, Text, useWindowDimensions, FlatList, Platform, StatusBar, Pressab
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { getUser } from '../../redux/slices/userSlice';
-import { Avatars, ChatObj, Chatter } from '../../entity/types';
+import { Avatars, ChatObj, Chatter, ConversationObj } from '../../entity/types';
 import { timeAgo, timeAgoShort } from '../../utilities/CommonFunction';
 import { Icon } from '@rneui/base';
 import TextInput from '../../components/textInput';
@@ -21,7 +21,7 @@ const ChatPage = (p: any) => {
 
   const avatar: Avatars = p.route.params.avatar;
   const displayName: string = p.route.params.displayName;
-  const uid: string = p.route.params.uid;
+  const otherId: string = p.route.params.uid;
   const myid: string = currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_");
 
   const [conversationId, setConversationId] = useState("");
@@ -44,20 +44,20 @@ const ChatPage = (p: any) => {
   }, [nav])
 
   function checkConversation() {
-    rdb.ref('/chatConversation/' + (uid + myid)).once('value', snapShot => {
+    rdb.ref('/chatConversation/' + (otherId + myid)).once('value', snapShot => {
       if (snapShot.exists()) {
-        console.log(" yes 1" + (uid + myid))
-        setConversationId((uid + myid))
+        console.log(" yes 1" + (otherId + myid))
+        setConversationId((otherId + myid))
       } else {
-        console.log(" no 2" + (uid + myid))
-        rdb.ref('/chatConversation/' + (myid + uid)).once('value', snapShot => {
+        console.log(" no 2" + (otherId + myid))
+        rdb.ref('/chatConversation/' + (myid + otherId)).once('value', snapShot => {
           if (snapShot.exists()) {
-            console.log(" yes 3" + (myid + uid))
-            setConversationId((myid + uid))
+            console.log(" yes 3" + (myid + otherId))
+            setConversationId((myid + otherId))
           } else {
-            console.log(" no 4" + (myid + uid))
-            rdb.ref('/chatConversation/' + (myid + uid) + "/st_time").set(new Date().getTime());
-            setConversationId((myid + uid))
+            console.log(" no 4" + (myid + otherId))
+            rdb.ref('/chatConversation/' + (myid + otherId) + "/st_time").set(new Date().getTime());
+            setConversationId((myid + otherId))
           }
         })
       }
@@ -74,7 +74,7 @@ const ChatPage = (p: any) => {
   }, [currentMsg]);
 
   function otherMessageListener() {
-    messageListener.current = rdb.ref('/chatConversation/' + conversationId + "/" + uid).on('value', snapShot => {
+    messageListener.current = rdb.ref('/chatConversation/' + conversationId + "/" + otherId).on('value', snapShot => {
       if (snapShot.exists()) {
         const data: ChatObj = snapShot.val();
         setCurrentMsg(data);
@@ -102,7 +102,7 @@ const ChatPage = (p: any) => {
       loadChat();
       return () => {
         if (messageListener.current) {
-          rdb.ref('/chatConversation/' + conversationId + "/" + uid).off('value', messageListener.current)
+          rdb.ref('/chatConversation/' + conversationId + "/" + otherId).off('value', messageListener.current)
         }
       }
     }
@@ -133,6 +133,18 @@ const ChatPage = (p: any) => {
     console.log("saveMesssage 22222", conversationId)
     rdb.ref('/chatConversation/' + conversationId + "/all/" + msg.timeStamp).set(msg)
     rdb.ref('/chatConversation/' + conversationId + "/" + myid).set(msg)
+    const c: ConversationObj = {
+      avatar: avatar,
+      conversationId: conversationId,
+      displayName: displayName,
+      message: msg.message,
+      timeStamp: msg.timeStamp,
+      uid: myid,
+    }
+    rdb.ref('/userConversation/' + myid + "/" + conversationId).set(c)
+    // rdb.ref('/lastMessage/' + myid + "/" + conversationId).set(c)
+    rdb.ref('/userConversation/' + otherId + "/" + conversationId).set(c)
+    rdb.ref('/lastMessage/' + otherId + "/" + conversationId).set(c)
   }
 
   return (
