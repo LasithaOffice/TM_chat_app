@@ -1,5 +1,5 @@
 import { View, Text, TextInput as TI, DimensionValue, useWindowDimensions, ColorValue, NativeSyntheticEvent, TextInputKeyPressEventData, TextInputFocusEventData, StyleProp, ViewStyle, InputModeOptions } from 'react-native'
-import React from 'react'
+import React, { forwardRef } from 'react'
 import { Icon } from '@rneui/base'
 
 type Props = {
@@ -24,7 +24,6 @@ type Props = {
   clearTextOnFocus?: boolean,
   noinput?: boolean,
   secureTextEntry?: boolean,
-  ref?: any,
   onKeyPress?:
   | ((e: NativeSyntheticEvent<TextInputKeyPressEventData>) => void)
   | undefined
@@ -38,7 +37,7 @@ type Props = {
   inputMode?: InputModeOptions | undefined;
 }
 
-const TextInput = (p: Props) => {
+const TextInput = forwardRef((p: Props, ref: any) => {
 
   const { height, width } = useWindowDimensions();
 
@@ -66,8 +65,10 @@ const TextInput = (p: Props) => {
       {
         (p.startIcon) && <Icon style={{ marginLeft: 10 }} color={p.startIcon.color} name={p.startIcon.name} type={p.startIcon.type} />
       }
-      <TI secureTextEntry={p.secureTextEntry} value={p.value} inputMode={p.inputMode} onFocus={p.onFocus}
-        placeholderTextColor={'#aaa'} editable={!p.noinput} ref={p.ref}
+      <TI
+        ref={ref}
+        secureTextEntry={p.secureTextEntry} value={p.value} inputMode={p.inputMode} onFocus={p.onFocus}
+        placeholderTextColor={'#aaa'} editable={!p.noinput}
         onKeyPress={p.onKeyPress} clearTextOnFocus={p.clearTextOnFocus}
         onChangeText={p.onChangeText} placeholder={p.placeholder} style={{
           flex: 1,
@@ -86,6 +87,6 @@ const TextInput = (p: Props) => {
       }
     </View>
   )
-}
+})
 
 export default TextInput

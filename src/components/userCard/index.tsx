@@ -9,7 +9,7 @@ import { CallObject } from '../../entity/types'
 import { useNavigation } from '@react-navigation/native'
 import { iconColor, lightColor } from '../../utilities/colors'
 
-const UserCard = ({ user, }: { user: User }) => {
+const UserCard = ({ user, chat }: { user: User, chat?: any }) => {
 
   const currentUser = useSelector(getUser);
   const [processing, setProcessing] = useState(false);
@@ -125,21 +125,28 @@ const UserCard = ({ user, }: { user: User }) => {
         flex: 1
       }}>{user.displayName}</Text>
       {
-        (processing) ?
-          <ActivityIndicator style={{ marginRight: 20 }} />
+        (chat) ?
+          <TouchableOpacity onPress={() => {
+            initiateAVoiceCall();
+          }} style={{ marginRight: 20 }}>
+            <Icon size={20} color={iconColor} name='phone' type='font-awesome' />
+          </TouchableOpacity>
           :
-          <>
-            <TouchableOpacity onPress={() => {
-              initiateAVoiceCall();
-            }} style={{ marginRight: 20 }}>
-              <Icon size={20} color={iconColor} name='phone' type='font-awesome' />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => {
-              initiateAVideoCall();
-            }} style={{ marginRight: 15 }}>
-              <Icon size={20} color={iconColor} name='video' type='font-awesome-5' />
-            </TouchableOpacity>
-          </>
+          (processing) ?
+            <ActivityIndicator style={{ marginRight: 20 }} />
+            :
+            <>
+              <TouchableOpacity onPress={() => {
+                initiateAVoiceCall();
+              }} style={{ marginRight: 20 }}>
+                <Icon size={20} color={iconColor} name='phone' type='font-awesome' />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => {
+                initiateAVideoCall();
+              }} style={{ marginRight: 15 }}>
+                <Icon size={20} color={iconColor} name='video' type='font-awesome-5' />
+              </TouchableOpacity>
+            </>
       }
     </View>
   )

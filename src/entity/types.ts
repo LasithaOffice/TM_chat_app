@@ -18,3 +18,16 @@ export interface CallLog {
   st_time: number
   status: "connected" | "missed"
 }
+
+export interface ChatObj {
+  message: string;
+  user: string;
+  timeStamp: number;
+}
+
+export interface Chatter {
+  name: string;
+  img: string;
+  id: string;
+  stat: number;
+}

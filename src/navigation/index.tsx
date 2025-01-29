@@ -18,6 +18,7 @@ import { darkerColor, iconColor, lightColor, videoColor, voiceColor } from '../u
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import CallHistory from '../screens/callHistory';
 import Settings from '../screens/settings';
+import ChatPage from '../screens/chatPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -201,6 +202,11 @@ const MainNavigation = () => {
           }
         } />
         <Stack.Screen name='VideoCall' component={VideoCall} options={
+          {
+            headerShown: false
+          }
+        } />
+        <Stack.Screen name='ChatPage' component={ChatPage} options={
           {
             headerShown: false
           }
