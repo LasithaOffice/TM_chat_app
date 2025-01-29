@@ -21,7 +21,7 @@ export interface CallLog {
 
 export interface ChatObj {
   message: string;
-  user: string;
+  uid: string;
   timeStamp: number;
 }
 

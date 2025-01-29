@@ -34,6 +34,25 @@ export function timeAgo(date: number) {
   });
 }
 
+export function timeAgoShort(date: number) {
+  const now = new Date();
+  const postDate = new Date(date);
+  const diffInSeconds = Math.floor((now.getTime() - postDate.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Just now"; // Less than a minute
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min`; // Less than an hour
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}hr`; // Less than a day
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} day`; // Less than a week
+
+  // For older dates, use a full date format
+  // const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return postDate.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
 export function duration(st: number, en: number) {
   const duration = new Date(en - st);
   const diffInSeconds = (en - st);

@@ -88,7 +88,7 @@ const Home = () => {
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, marginHorizontal: 10 }}>
         <View style={{ flex: 0.48 }}><Button loading={!tokenReceived} icon={{ name: 'message1', type: 'antdesign' }} dark title='New Chat' onPress={() => {
-          nav.navigate('VideoCall');
+          nav.navigate('ChatUserList');
         }} /></View>
         <View style={{ flex: 0.48 }}><Button loading={!tokenReceived} icon={{ name: 'phone-call', type: 'feather' }} dark title='Call' onPress={() => {
           nav.navigate('CallList');

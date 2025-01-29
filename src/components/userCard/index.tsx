@@ -65,6 +65,61 @@ const UserCard = ({ user, chat }: { user: User, chat?: any }) => {
       })
   }
 
+  function initiateAConversation() {
+    //setProcessing(true);
+    nav.navigate('ChatPage', {
+      displayName: user.displayName,
+      avatar: user.avatar,
+      uid: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+    })
+    // rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+    //   .once('value', (snapshot) => {
+    //     const call: CallObject = snapshot.val() as CallObject;
+    //     if (call) {
+    //       if (call.status == 'ended') {
+    //         rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+    //           .set({
+    //             callerName: currentUser.user.displayName,
+    //             callerAvatar: currentUser.user.avatar,
+    //             callerId: currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"),
+    //             status: "incoming",
+    //             type: "voice"
+    //           })
+    //           .then(() => {
+    //             setProcessing(false);
+    //             nav.navigate('VoiceCall', {
+    //               callerName: user.displayName,
+    //               callerAvatar: user.avatar,
+    //               callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+    //               act: "sender",
+    //             })
+    //           });
+    //       } else {
+    //         setProcessing(false);
+    //         ToastAndroid.show("Already in a call!", ToastAndroid.SHORT);
+    //       }
+    //     } else {
+    //       rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
+    //         .set({
+    //           callerName: currentUser.user.displayName,
+    //           callerAvatar: currentUser.user.avatar,
+    //           callerId: currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"),
+    //           status: "incoming",
+    //           type: "voice"
+    //         })
+    //         .then(() => {
+    //           setProcessing(false);
+    //           nav.navigate('VoiceCall', {
+    //             callerName: user.displayName,
+    //             callerAvatar: user.avatar,
+    //             callerId: user.email.replaceAll("@", "_").replaceAll(".", "_"),
+    //             act: "sender",
+    //           })
+    //         });
+    //     }
+    //   })
+  }
+
   function initiateAVideoCall() {
     setProcessing(true);
     rdb.ref('/calls/' + user.email.replaceAll("@", "_").replaceAll(".", "_"))
@@ -127,9 +182,9 @@ const UserCard = ({ user, chat }: { user: User, chat?: any }) => {
       {
         (chat) ?
           <TouchableOpacity onPress={() => {
-            initiateAVoiceCall();
+            initiateAConversation();
           }} style={{ marginRight: 20 }}>
-            <Icon size={20} color={iconColor} name='phone' type='font-awesome' />
+            <Icon size={30} color={iconColor} name='chat-plus-outline' type='material-community' />
           </TouchableOpacity>
           :
           (processing) ?

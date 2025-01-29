@@ -19,6 +19,7 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 import CallHistory from '../screens/callHistory';
 import Settings from '../screens/settings';
 import ChatPage from '../screens/chatPage';
+import ChatUserList from '../screens/chatUserList';
 
 const Stack = createNativeStackNavigator();
 
@@ -208,7 +209,21 @@ const MainNavigation = () => {
         } />
         <Stack.Screen name='ChatPage' component={ChatPage} options={
           {
-            headerShown: false
+            statusBarBackgroundColor: darkerColor,
+            headerTintColor: iconColor,
+            headerStyle: {
+              backgroundColor: darkerColor,
+            },
+          }
+        } />
+        <Stack.Screen name='ChatUserList' component={ChatUserList} options={
+          {
+            title: "Create a new conversation",
+            statusBarBackgroundColor: darkerColor,
+            headerTintColor: iconColor,
+            headerStyle: {
+              backgroundColor: darkerColor,
+            },
           }
         } />
       </Stack.Navigator>
