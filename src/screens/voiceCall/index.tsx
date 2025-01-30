@@ -1,4 +1,4 @@
-import { View, Text, Platform, PermissionsAndroid, StyleSheet, ActivityIndicator, TouchableOpacity, DeviceEventEmitter } from 'react-native'
+import { View, Text, Platform, PermissionsAndroid, StyleSheet, ActivityIndicator, TouchableOpacity, DeviceEventEmitter, Alert, BackHandler } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   createAgoraRtcEngine,
@@ -155,12 +155,21 @@ const VoiceCall = (p: any) => {
 
   useEffect(() => {
     setupVoiceSDKEngine();
+    const backAction = () => {
+      Alert.alert('Hold on!', 'Are you sure you want to end the call and go back?', [
+        { text: 'Cancel', style: 'cancel', onPress: () => null },
+        { text: 'Yes', onPress: () => endCall() },
+      ]);
+      return true; // Prevent default behavior (going back)
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => {
       if (eventHandler.current) {
         console.log("removed agora listener")
         agoraEngineRef.current?.unregisterEventHandler(eventHandler.current);
         agoraEngineRef.current?.release();
       }
+      backHandler.remove();
     };
   }, [])
 

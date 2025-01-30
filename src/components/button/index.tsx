@@ -32,7 +32,7 @@ const Button = (p: Props) => {
         (p.loading) ?
           <ActivityIndicator />
           :
-          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={styles.textContainer}>
             {
               (p.icon) &&
               <Icon size={20} color={(p.dark) ? lightColor : darkerColor} name={p.icon.name} type={p.icon.type} style={{ marginRight: 10 }} />
@@ -53,5 +53,10 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 10,
     justifyContent: 'center',
+  },
+  textContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 })

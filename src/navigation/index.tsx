@@ -10,7 +10,7 @@ import { Icon } from '@rneui/base';
 import { useSelector } from 'react-redux';
 import { getUser } from '../redux/slices/userSlice';
 import { rdb } from '../firebase/firebaseInit';
-import { CallObject } from '../entity/types';
+import { CallObject, ConversationObj } from '../entity/types';
 import CallList from '../screens/callList';
 import VoiceCall from '../screens/voiceCall';
 import VideoCall from '../screens/videoCall';
@@ -27,14 +27,12 @@ const MainNavigation = () => {
 
   const { width, height } = useWindowDimensions();
 
-  // const a = new Animated.Value((height));
-  const a = useRef(new Animated.Value(height)).current;
+  const callNotificationY = useRef(new Animated.Value(height)).current;
+  const messageNotificationY = useRef(new Animated.Value(-200)).current;
 
   function callComes() {
     console.log("call starts ", currentUser.user.displayName)
-    //ToastAndroid.show("comes", ToastAndroid.SHORT)
-    // console.log("new height ", (height - 60 - gap.bottom), (height - 60 + gap.bottom))
-    Animated.spring(a, {
+    Animated.spring(callNotificationY, {
       speed: 1,
       toValue: (height - 100),
       useNativeDriver: true,
@@ -43,9 +41,31 @@ const MainNavigation = () => {
 
   function callEnds() {
     console.log("hideeeee")
-    Animated.spring(a, {
+    Animated.spring(callNotificationY, {
       speed: 1,
       toValue: (height),
+      useNativeDriver: true,
+    }).start();
+  }
+
+  const interval = useRef<any>();
+
+  function messageComes() {
+    Animated.spring(messageNotificationY, {
+      speed: 1,
+      toValue: 5,
+      useNativeDriver: true,
+    }).start();
+    setTimeout(() => {
+      clearInterval(interval.current);
+      messageEnds();
+    }, 3000)
+  }
+
+  function messageEnds() {
+    Animated.spring(messageNotificationY, {
+      speed: 1,
+      toValue: -200,
       useNativeDriver: true,
     }).start();
   }
@@ -53,7 +73,7 @@ const MainNavigation = () => {
   function endCall() {
     console.log("hideeeee")
     //ToastAndroid.show("ends", ToastAndroid.SHORT)
-    Animated.spring(a, {
+    Animated.spring(callNotificationY, {
       speed: 1,
       toValue: (height),
       useNativeDriver: true,
@@ -72,6 +92,8 @@ const MainNavigation = () => {
   const nav: any = useNavigation();
 
   const [callObject, setCallObject] = useState<CallObject | null>(null);
+  const [lastMessage, setLastMessage] = useState<ConversationObj>();
+  const [secondTime, setSecondTime] = useState(false);
 
   const PATTERN = [
     1 * 1000,
@@ -80,7 +102,7 @@ const MainNavigation = () => {
   ];
 
   function answerCall() {
-    Animated.spring(a, {
+    Animated.spring(callNotificationY, {
       speed: 1,
       toValue: (height),
       useNativeDriver: true,
@@ -120,9 +142,6 @@ const MainNavigation = () => {
               } else if (call.status == 'ended') {
                 callEnds();
                 Vibration.cancel();
-                // if (currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_") != call.callerId) {
-                //   DeviceEventEmitter.emit("leaveCall");
-                // }
               } else if (call.status == 'incall') {
                 Vibration.cancel();
               }
@@ -130,7 +149,13 @@ const MainNavigation = () => {
           });
         chatRef.current = rdb.ref('/lastMessage/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
           .on('value', snapShot => {
-
+            if (snapShot.exists()) {
+              const msg: ConversationObj = Object.values(snapShot.val())[0] as ConversationObj;
+              console.log('Current screen ', nav.getCurrentRoute().name);
+              if (nav.getCurrentRoute().name != 'ChatPage') {
+                setLastMessage(msg);
+              }
+            }
           })
       }
     }
@@ -138,6 +163,16 @@ const MainNavigation = () => {
       rdb.ref('/calls/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_")).off('value', callRef.current);
     }
   }, [currentUser])
+
+  useEffect(() => {
+    if (lastMessage) {
+      if (secondTime) {
+        messageComes();
+      } else {
+        setSecondTime(true);
+      }
+    }
+  }, [lastMessage])
 
   return (
     <>
@@ -250,7 +285,7 @@ const MainNavigation = () => {
           alignItems: 'center',
           padding: 20,
           transform: [{
-            translateY: a,
+            translateY: callNotificationY,
           }],
         }}>
           {
@@ -279,6 +314,45 @@ const MainNavigation = () => {
             <Icon size={35} color={iconColor} name='cross' type='entypo' />
           </TouchableOpacity>
         </Animated.View>
+
+        <Animated.View style={{
+          width: width - 20,
+          backgroundColor: '#333',
+          position: 'absolute',
+          zIndex: 9999,
+          borderRadius: 10,
+          left: 10,
+          //top: a,
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 20,
+          transform: [{
+            translateY: messageNotificationY,
+          }],
+        }}>
+          {
+            (lastMessage) &&
+            <Avatar avt={lastMessage.avatar} />
+          }
+          <View style={{ flex: 1, marginLeft: 10, }}>
+            <Text style={{ color: lightColor, fontSize: 14 }}> {lastMessage?.displayName}</Text>
+            <Text style={{ color: iconColor, fontSize: 18 }}> {lastMessage?.message}</Text>
+          </View>
+          {/* <TouchableOpacity onPress={answerCall} style={{
+            width: 40, height: 40,
+            backgroundColor: (callObject?.type == 'video') ? videoColor : voiceColor, borderRadius: 100,
+            justifyContent: 'center', alignItems: 'center',
+            marginRight: 10
+          }}>
+            {
+              (callObject && callObject.type == 'video') ?
+                <Icon size={20} color={iconColor} name='video' type='font-awesome-5' />
+                :
+                <Icon size={30} color={iconColor} name='phone' type='font-awesome' />
+            }
+          </TouchableOpacity> */}
+        </Animated.View>
+
       </View>
     </>
   )

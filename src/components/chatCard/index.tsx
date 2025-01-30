@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, Pressable, StyleSheet } from 'react-native'
 import React from 'react'
 import Avatar from '../avatar';
 import { ConversationObj } from '../../entity/types';
@@ -23,27 +23,35 @@ const ChatCard = ({ conversation }: { conversation: ConversationObj }) => {
       initiateAConversation();
     }} android_ripple={{
       color: disableColor
-    }} style={{ flexDirection: 'row', alignItems: 'center', padding: 10 }}>
+    }} style={styles.itemContainer}>
       <Avatar avt={conversation.avatar} size={40} marginLeft={10} />
       <View style={{ flex: 1 }}>
-        <Text style={{
-          marginLeft: 10,
-          fontSize: 20,
-          color: lightColor,
-        }}>{conversation.displayName}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10, marginTop: 2 }}>
-          <Text style={{
-            fontSize: 14,
-            color: lightColor,
-          }}>{conversation.message}</Text>
+        <Text style={styles.displayName}>{conversation.displayName}</Text>
+        <View style={styles.messageContainer}>
+          <Text style={styles.message}>{conversation.message}</Text>
         </View>
       </View>
-      <Text numberOfLines={1} style={{
-        fontSize: 12,
-        color: lightColor,
-      }}>{timeAgoShort(conversation.timeStamp)}</Text>
+      <Text numberOfLines={1} style={styles.time}>{timeAgoShort(conversation.timeStamp)}</Text>
     </Pressable>
   )
 }
 
 export default ChatCard
+
+const styles = StyleSheet.create({
+  itemContainer: { flexDirection: 'row', alignItems: 'center', padding: 10 },
+  displayName: {
+    marginLeft: 10,
+    fontSize: 20,
+    color: lightColor,
+  },
+  messageContainer: { flexDirection: 'row', alignItems: 'center', marginLeft: 10, marginTop: 2 },
+  message: {
+    fontSize: 14,
+    color: lightColor,
+  },
+  time: {
+    fontSize: 12,
+    color: lightColor,
+  }
+})

@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, ToastAndroid, ActivityIndicator, Pressable } from 'react-native'
+import { View, Text, Image, TouchableOpacity, ToastAndroid, ActivityIndicator, Pressable, StyleSheet } from 'react-native'
 import React, { useState } from 'react'
 import { getUser, User } from '../../redux/slices/userSlice'
 import Avatar from '../avatar'
@@ -127,15 +127,11 @@ const CallLogItem = (p: Props) => {
       } else {
         initiateAVoiceCall();
       }
-    }} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingLeft: 10 }}>
+    }} style={styles.itemContainer}>
       <Avatar avt={p.callLog.avatar} size={50} marginLeft={10} />
       <View style={{ flex: 1 }}>
-        <Text style={{
-          marginLeft: 10,
-          fontSize: 20,
-          color: lightColor,
-        }}>{p.callLog.displayName}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10, marginTop: 2 }}>
+        <Text style={styles.displayName}>{p.callLog.displayName}</Text>
+        <View style={styles.optionContainer}>
           {
             (p.callLog.role == 'sender') ?
               (
@@ -161,19 +157,19 @@ const CallLogItem = (p: Props) => {
       </View>
       {
         (p.callLog.type == 'voice') ?
-          <View style={{ marginRight: 5, width: 60, }}>
+          <View style={styles.iconContainer}>
             <Icon size={30} color={iconColor} name='phone' type='font-awesome' />
             {
               (p.callLog.status == 'connected') &&
-              <Text style={{ marginTop: 5, color: lightColor, textAlign: 'center' }}>{duration(p.callLog.st_time, p.callLog.en_time)}</Text>
+              <Text style={styles.duration}>{duration(p.callLog.st_time, p.callLog.en_time)}</Text>
             }
           </View>
           :
-          <View style={{ marginRight: 5, width: 60, }}>
+          <View style={styles.iconContainer}>
             <Icon size={30} color={iconColor} name='video' type='font-awesome-5' />
             {
               (p.callLog.status == 'connected') &&
-              <Text style={{ marginTop: 5, color: lightColor, textAlign: 'center' }}>{duration(p.callLog.st_time, p.callLog.en_time)}</Text>
+              <Text style={styles.duration}>{duration(p.callLog.st_time, p.callLog.en_time)}</Text>
             }
           </View>
       }
@@ -182,3 +178,15 @@ const CallLogItem = (p: Props) => {
 }
 
 export default CallLogItem
+
+const styles = StyleSheet.create({
+  itemContainer: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingLeft: 10 },
+  displayName: {
+    marginLeft: 10,
+    fontSize: 20,
+    color: lightColor,
+  },
+  optionContainer: { flexDirection: 'row', alignItems: 'center', marginLeft: 10, marginTop: 2 },
+  iconContainer: { marginRight: 5, width: 60, },
+  duration: { marginTop: 5, color: lightColor, textAlign: 'center' }
+})
