@@ -4,12 +4,26 @@ import Avatar from '../avatar';
 import { ConversationObj } from '../../entity/types';
 import { disableColor, lightColor } from '../../utilities/colors';
 import { timeAgo, timeAgoShort } from '../../utilities/CommonFunction';
+import { useNavigation } from '@react-navigation/native';
 
 const ChatCard = ({ conversation }: { conversation: ConversationObj }) => {
+
+  const nav: any = useNavigation();
+
+  function initiateAConversation() {
+    nav.navigate('ChatPage', {
+      displayName: conversation.displayName,
+      avatar: conversation.avatar,
+      uid: conversation.uid
+    })
+  }
+
   return (
-    <Pressable android_ripple={{
+    <Pressable onPress={() => {
+      initiateAConversation();
+    }} android_ripple={{
       color: disableColor
-    }} style={{ flexDirection: 'row', marginTop: 20, alignItems: 'center', padding: 10 }}>
+    }} style={{ flexDirection: 'row', alignItems: 'center', padding: 10 }}>
       <Avatar avt={conversation.avatar} size={40} marginLeft={10} />
       <View style={{ flex: 1 }}>
         <Text style={{
@@ -19,13 +33,13 @@ const ChatCard = ({ conversation }: { conversation: ConversationObj }) => {
         }}>{conversation.displayName}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10, marginTop: 2 }}>
           <Text style={{
-            fontSize: 16,
+            fontSize: 14,
             color: lightColor,
           }}>{conversation.message}</Text>
         </View>
       </View>
       <Text numberOfLines={1} style={{
-        fontSize: 16,
+        fontSize: 12,
         color: lightColor,
       }}>{timeAgoShort(conversation.timeStamp)}</Text>
     </Pressable>

@@ -41,7 +41,7 @@ export function timeAgoShort(date: number) {
 
   if (diffInSeconds < 60) return "Just now"; // Less than a minute
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min`; // Less than an hour
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}hr`; // Less than a day
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hr`; // Less than a day
   if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} day`; // Less than a week
 
   // For older dates, use a full date format

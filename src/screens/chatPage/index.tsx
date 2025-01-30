@@ -26,9 +26,11 @@ const ChatPage = (p: any) => {
 
   const [conversationId, setConversationId] = useState("");
 
+  const [typing, setTyping] = useState(false);
+
   useEffect(() => {
     nav.setOptions({
-      title: displayName,
+      title: displayName + ((typing) ? " typing..." : ""),
       headerCenter: (props: any) => {
         return (
           <>
@@ -41,23 +43,26 @@ const ChatPage = (p: any) => {
         );
       },
     })
-  }, [nav])
+  }, [nav, typing])
 
   function checkConversation() {
     rdb.ref('/chatConversation/' + (otherId + myid)).once('value', snapShot => {
       if (snapShot.exists()) {
         console.log(" yes 1" + (otherId + myid))
         setConversationId((otherId + myid))
+        rdb.ref('/chatConversation/' + (otherId + myid) + "/" + otherId).remove();
       } else {
         console.log(" no 2" + (otherId + myid))
         rdb.ref('/chatConversation/' + (myid + otherId)).once('value', snapShot => {
           if (snapShot.exists()) {
             console.log(" yes 3" + (myid + otherId))
             setConversationId((myid + otherId))
+            rdb.ref('/chatConversation/' + (myid + otherId) + "/" + otherId).remove();
           } else {
             console.log(" no 4" + (myid + otherId))
             rdb.ref('/chatConversation/' + (myid + otherId) + "/st_time").set(new Date().getTime());
             setConversationId((myid + otherId))
+            rdb.ref('/chatConversation/' + (myid + otherId) + "/" + otherId).remove();
           }
         })
       }
@@ -77,7 +82,14 @@ const ChatPage = (p: any) => {
     messageListener.current = rdb.ref('/chatConversation/' + conversationId + "/" + otherId).on('value', snapShot => {
       if (snapShot.exists()) {
         const data: ChatObj = snapShot.val();
-        setCurrentMsg(data);
+        if (data.timeStamp > 0) {
+          setCurrentMsg(data);
+          setTyping(false);
+        } else if (data.timeStamp == -1) {
+          setTyping(false);
+        } else {
+          setTyping(true);
+        }
       }
     })
   }
@@ -104,6 +116,7 @@ const ChatPage = (p: any) => {
         if (messageListener.current) {
           rdb.ref('/chatConversation/' + conversationId + "/" + otherId).off('value', messageListener.current)
         }
+        rdb.ref('/chatConversation/' + (conversationId) + "/" + myid).remove();
       }
     }
   }, [conversationId])
@@ -133,19 +146,45 @@ const ChatPage = (p: any) => {
     console.log("saveMesssage 22222", conversationId)
     rdb.ref('/chatConversation/' + conversationId + "/all/" + msg.timeStamp).set(msg)
     rdb.ref('/chatConversation/' + conversationId + "/" + myid).set(msg)
-    const c: ConversationObj = {
+    const c1: ConversationObj = {
+      avatar: currentUser.user.avatar,
+      conversationId: conversationId,
+      displayName: currentUser.user.displayName,
+      message: msg.message,
+      timeStamp: msg.timeStamp,
+      uid: myid,
+    }
+    const c2: ConversationObj = {
       avatar: avatar,
       conversationId: conversationId,
       displayName: displayName,
       message: msg.message,
       timeStamp: msg.timeStamp,
-      uid: myid,
+      uid: otherId,
     }
-    rdb.ref('/userConversation/' + myid + "/" + conversationId).set(c)
+    rdb.ref('/userConversation/' + myid + "/" + conversationId).set(c2)
     // rdb.ref('/lastMessage/' + myid + "/" + conversationId).set(c)
-    rdb.ref('/userConversation/' + otherId + "/" + conversationId).set(c)
-    rdb.ref('/lastMessage/' + otherId + "/" + conversationId).set(c)
+    rdb.ref('/userConversation/' + otherId + "/" + conversationId).set(c1)
+    rdb.ref('/lastMessage/' + otherId + "/" + conversationId).set(c1)
   }
+
+  useEffect(() => {
+    if (message.length == 1) {
+      const nchat: ChatObj = {
+        message: "",
+        uid: myid,
+        timeStamp: 0,
+      };
+      rdb.ref('/chatConversation/' + conversationId + "/" + myid).set(nchat)
+    } else if (message.length == 0) {
+      const nchat: ChatObj = {
+        message: "",
+        uid: myid,
+        timeStamp: -1,
+      };
+      rdb.ref('/chatConversation/' + conversationId + "/" + myid).set(nchat)
+    }
+  }, [message])
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.darker }}>

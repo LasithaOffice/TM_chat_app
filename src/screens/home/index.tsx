@@ -116,6 +116,7 @@ const Home = () => {
         }} /></View>
       </View>
       <FlatList
+        style={{ marginTop: 10 }}
         data={chats}
         keyExtractor={(item) => item.timeStamp.toString()}
         renderItem={({ index, item }) =>
