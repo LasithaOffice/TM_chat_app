@@ -150,7 +150,7 @@ const MainNavigation = () => {
         chatRef.current = rdb.ref('/lastMessage/' + currentUser.user.email.replaceAll("@", "_").replaceAll(".", "_"))
           .on('value', snapShot => {
             if (snapShot.exists()) {
-              const msg: ConversationObj = Object.values(snapShot.val())[0] as ConversationObj;
+              const msg: ConversationObj = snapShot.val() as ConversationObj;
               console.log('Current screen ', nav.getCurrentRoute().name);
               if (nav.getCurrentRoute().name != 'ChatPage') {
                 setLastMessage(msg);

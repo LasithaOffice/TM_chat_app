@@ -163,26 +163,27 @@ const ChatPage = (p: any) => {
       uid: otherId,
     }
     rdb.ref('/userConversation/' + myid + "/" + conversationId).set(c2)
-    // rdb.ref('/lastMessage/' + myid + "/" + conversationId).set(c)
     rdb.ref('/userConversation/' + otherId + "/" + conversationId).set(c1)
-    rdb.ref('/lastMessage/' + otherId + "/" + conversationId).set(c1)
+    rdb.ref('/lastMessage/' + otherId).set(c1)
   }
 
   useEffect(() => {
-    if (message.length == 1) {
-      const nchat: ChatObj = {
-        message: "",
-        uid: myid,
-        timeStamp: 0,
-      };
-      rdb.ref('/chatConversation/' + conversationId + "/" + myid).set(nchat)
-    } else if (message.length == 0) {
-      const nchat: ChatObj = {
-        message: "",
-        uid: myid,
-        timeStamp: -1,
-      };
-      rdb.ref('/chatConversation/' + conversationId + "/" + myid).set(nchat)
+    if (conversationId) {
+      if (message.length == 1) {
+        const nchat: ChatObj = {
+          message: "",
+          uid: myid,
+          timeStamp: 0,
+        };
+        rdb.ref('/chatConversation/' + conversationId + "/" + myid).set(nchat)
+      } else if (message.length == 0) {
+        const nchat: ChatObj = {
+          message: "",
+          uid: myid,
+          timeStamp: -1,
+        };
+        rdb.ref('/chatConversation/' + conversationId + "/" + myid).set(nchat)
+      }
     }
   }, [message])
 

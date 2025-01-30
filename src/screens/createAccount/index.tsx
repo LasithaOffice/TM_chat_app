@@ -58,61 +58,61 @@ const CreateAccount = () => {
         }} />
         <Text style={{ marginTop: 20, color: iconColor, fontWeight: '600' }}>Select an avatar</Text>
         <View>
-          <View style={{ flexDirection: 'row', paddingTop: 20 }}>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => { setAvatar('male_1') }}>
+          <View style={{ flexDirection: 'row', paddingTop: 5, justifyContent: 'center' }}>
+            <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => { setAvatar('male_1') }}>
               <View style={[styles.avatarBordered,
               {
                 borderWidth: (avatar == 'male_1') ? 2 : 0,
               }
               ]}>
-                <Image style={{ width: 100, height: 100 }} source={require('../../resources/images/male_1.png')} />
+                <Image style={{ width: 80, height: 80 }} source={require('../../resources/images/male_1.png')} />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => { setAvatar('female_1') }}>
+            <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => { setAvatar('female_1') }}>
               <View style={[styles.avatarBordered,
               {
                 borderWidth: (avatar == 'female_1') ? 2 : 0,
               }
               ]}>
-                <Image style={{ width: 100, height: 100 }} source={require('../../resources/images/female_1.png')} />
+                <Image style={{ width: 80, height: 80 }} source={require('../../resources/images/female_1.png')} />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => { setAvatar('male_2') }}>
+            <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => { setAvatar('male_2') }}>
               <View style={[styles.avatarBordered,
               {
                 borderWidth: (avatar == 'male_2') ? 2 : 0,
               }
               ]}>
-                <Image style={{ width: 100, height: 100 }} source={require('../../resources/images/male_2.png')} />
+                <Image style={{ width: 80, height: 80 }} source={require('../../resources/images/male_2.png')} />
               </View>
             </TouchableOpacity>
           </View>
-          <View style={{ flexDirection: 'row', paddingVertical: 20 }}>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => { setAvatar('female_2') }}>
+          <View style={{ flexDirection: 'row', paddingVertical: 5 }}>
+            <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => { setAvatar('female_2') }}>
               <View style={[styles.avatarBordered,
               {
                 borderWidth: (avatar == 'female_2') ? 2 : 0,
               }
               ]}>
-                <Image style={{ width: 100, height: 100 }} source={require('../../resources/images/female_2.png')} />
+                <Image style={{ width: 80, height: 80 }} source={require('../../resources/images/female_2.png')} />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => { setAvatar('male_3') }}>
+            <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => { setAvatar('male_3') }}>
               <View style={[styles.avatarBordered,
               {
                 borderWidth: (avatar == 'male_3') ? 2 : 0,
               }
               ]}>
-                <Image style={{ width: 100, height: 100 }} source={require('../../resources/images/male_3.png')} />
+                <Image style={{ width: 80, height: 80 }} source={require('../../resources/images/male_3.png')} />
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => { setAvatar('female_3') }}>
+            <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => { setAvatar('female_3') }}>
               <View style={[styles.avatarBordered,
               {
                 borderWidth: (avatar == 'female_3') ? 2 : 0,
               }
               ]}>
-                <Image style={{ width: 100, height: 100 }} source={require('../../resources/images/female_3.png')} />
+                <Image style={{ width: 80, height: 80 }} source={require('../../resources/images/female_3.png')} />
               </View>
             </TouchableOpacity>
           </View>
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   avatarBordered: {
     borderRadius: 500,
     borderColor: iconColor,
-    width: 110, height: 110,
+    width: 90, height: 90,
     alignItems: 'center',
     justifyContent: 'center'
   },

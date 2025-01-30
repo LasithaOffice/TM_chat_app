@@ -15,9 +15,12 @@ const Settings = () => {
 
   function signOut() {
     setLogginOut(true);
-    AsyncStorage.removeItem('email');
+    GoogleSignin.configure({
+      webClientId: '432700589651-ho1ope7d0o8hpbq32q6oildoi20gm6ev.apps.googleusercontent.com',
+    });
     GoogleSignin.signOut().then(r => {
       setLogginOut(false);
+      AsyncStorage.removeItem('email');
       nav.replace("Login");
     }).catch(e => {
       console.log("errrrr ", e)
